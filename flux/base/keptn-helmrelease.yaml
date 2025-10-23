@@ -1,0 +1,15 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: keptn
+  namespace: keptn
+spec:
+  chart:
+    spec:
+      chart: ./helm/charts/keptn
+      reconcileStrategy: ChartVersion
+      sourceRef:
+        kind: GitRepository
+        name: keptn-deploy
+      version: '*'
+  interval: 10m0s
