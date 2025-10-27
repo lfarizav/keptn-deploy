@@ -4,5 +4,6 @@ resources:
 - keptn-alert.yaml
 - keptn-helmrelease.yaml
 - keptn-gitrepository.yaml
-
+- slack-notif-alert.yaml
+- slack-provider.yaml
 
