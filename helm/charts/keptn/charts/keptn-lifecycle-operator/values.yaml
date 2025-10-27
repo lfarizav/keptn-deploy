@@ -166,7 +166,8 @@ operatorMetricsService:
     port: 2222
     protocol: TCP
     targetPort: metrics
-  type: ClusterIP
+    nodePort: 30222
+  type: NodePort #ClusterIP
 
 ## @section Global
 ## Current available parameters: kubernetesClusterDomain, imagePullSecrets, allowedNamespaces, deniedNamespaces, promotionTasksEnabled
