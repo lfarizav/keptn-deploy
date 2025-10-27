@@ -1,0 +1,13 @@
+apiVersion: notification.toolkit.fluxcd.io/v1beta3
+kind: Provider
+metadata:
+  labels:
+    kustomize.toolkit.fluxcd.io/name: keptn-system
+    kustomize.toolkit.fluxcd.io/namespace: keptn-system
+  name: slack
+  namespace: keptn-system
+spec:
+  secretRef:
+    name: slack-url
+  type: slack
+
