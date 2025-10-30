@@ -32,7 +32,7 @@ spec:
       {{- include "common.selectorLabels"  ( dict "context" . )  | nindent 8 }}
       annotations:
         kubectl.kubernetes.io/default-container: lifecycle-operator
-        metrics.dynatrace.com/port: "2222"
+        metrics.dynatrace.com/port: "8080"
         metrics.dynatrace.com/scrape: "true"
         {{- if .Values.podAnnotations }}
         {{- include "common.tplvalues.render" (dict "value" .Values.podAnnotations "context" $) | nindent 8 }}
@@ -99,7 +99,7 @@ spec:
         - containerPort: 9443
           name: webhook-server
           protocol: TCP
-        - containerPort: 2222
+        - containerPort: 8080
           name: metrics
           protocol: TCP
         resources: {{- toYaml .Values.resources | nindent 10 }}

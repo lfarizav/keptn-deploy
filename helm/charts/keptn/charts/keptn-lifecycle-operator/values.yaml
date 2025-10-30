@@ -96,7 +96,7 @@ env:
 ## @param   env.keptnWorkloadVersionControllerLogLevel sets the log level of Keptn WorkloadVersion Controller
   keptnWorkloadVersionControllerLogLevel: "0"
 ## @param   env.keptnDoraMetricsPort sets the port for accessing lifecycle metrics in prometheus format
-  keptnDoraMetricsPort: "2222"
+  keptnDoraMetricsPort: "8080"
 ## @param   env.optionsControllerLogLevel sets the log level of Keptn Options Controller
   optionsControllerLogLevel: "0"
 ## @param   env.pythonRunnerImage specify image for python task runtime
@@ -163,10 +163,10 @@ hostNetwork: false
 operatorMetricsService:
   ports:
   - name: metrics
-    port: 2222
+    port: 8080
     protocol: TCP
     targetPort: metrics
-    nodePort: 30222
+    nodePort: 30080
   type: NodePort #ClusterIP
 
 ## @section Global
