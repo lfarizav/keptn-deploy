@@ -784,4 +784,4 @@ See LICENSE file for details.
 
 ---
 
-**Managed by GitOps with ❤️**
+**Made it with ❤️ by Cuemby/Beanters using GitOps**
