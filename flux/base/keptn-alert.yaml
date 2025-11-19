@@ -2,7 +2,7 @@ apiVersion: notification.toolkit.fluxcd.io/v1beta3
 kind: Alert
 metadata:
   name: keptn-deploy
-  namespace: keptn
+  namespace: keptn-system
 spec:
   eventSeverity: info
   eventSources:

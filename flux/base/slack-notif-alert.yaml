@@ -16,5 +16,6 @@ spec:
   - kind: HelmRelease
     name: '*'
   providerRef:
-    name: slack
+    name: slack-shared
+    namespace: flux-system
 

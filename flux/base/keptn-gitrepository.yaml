@@ -1,13 +1,11 @@
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: GitRepository
 metadata:
-  name: keptn
-  namespace: keptn
+  name: keptn-deploy
+  namespace: keptn-system
 spec:
-  interval: 1m0s
+  interval: 5m0s
   ref:
     branch: main
-#  secretRef:
-#    name: github-credentials #k8s-open5gs
   timeout: 1m0s
   url: https://github.com/lfarizav/keptn-deploy.git
