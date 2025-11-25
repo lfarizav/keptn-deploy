@@ -30,3 +30,11 @@ spec:
     timeout: 5m
   driftDetection:
     mode: enabled
+  dependsOn:
+  - name: jaeger
+    namespace: jaeger
+  valuesFrom:
+  - kind: ConfigMap
+    name: keptn-observability-config
+    valuesKey: values.yaml
+    optional: true
