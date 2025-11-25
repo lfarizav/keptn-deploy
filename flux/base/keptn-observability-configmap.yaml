@@ -9,7 +9,7 @@ data:
     lifecycleOperator:
       enabled: true
       env:
-        otelCollectorUrl: "jaeger-collector.jaeger.svc.cluster.local:4317"
+        otelCollectorUrl: jaeger-collector.jaeger.svc.cluster.local:4317
       
     metricsOperator:
       enabled: true

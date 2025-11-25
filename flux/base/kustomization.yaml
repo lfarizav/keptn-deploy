@@ -4,6 +4,7 @@ resources:
 - keptn-alert.yaml
 - keptn-helmrelease.yaml
 - keptn-gitrepository.yaml
+- keptn-config.yaml
 - keptn-observability-configmap.yaml
 - keptn-servicemonitor.yaml
 - grafana-datasources.yaml
