@@ -5,6 +5,8 @@ resources:
 - keptn-helmrelease.yaml
 - keptn-gitrepository.yaml
 - keptn-observability-configmap.yaml
+- keptn-servicemonitor.yaml
+- grafana-dashboard.yaml
 - slack-provider.yaml
 - slack-notif-alert.yaml
 
