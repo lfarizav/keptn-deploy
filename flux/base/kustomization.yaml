@@ -4,7 +4,8 @@ resources:
 - keptn-alert.yaml
 - keptn-helmrelease.yaml
 - keptn-gitrepository.yaml
-- keptn-config.yaml
+# KeptnConfig will be added after Keptn is deployed
+# - keptn-config.yaml
 - keptn-observability-configmap.yaml
 - keptn-servicemonitor.yaml
 - grafana-datasources.yaml
