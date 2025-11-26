@@ -489,9 +489,3 @@ data:
       "version": 1,
       "weekStart": ""
     }
-kind: ConfigMap
-metadata:
-  name: grafana-dashboard-keptn-overview
-  namespace: monitoring
-  labels:
-    grafana_dashboard: "1"
