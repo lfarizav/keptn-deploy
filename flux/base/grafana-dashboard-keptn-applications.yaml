@@ -421,6 +421,17 @@ data:
           "fieldConfig": {
             "defaults": {},
             "overrides": []
+          },
+          "description": "Click on a trace to expand and see all deployment spans. Each trace shows pre-deployment, deployment, and post-deployment phases for all workloads."
+        },
+        {
+          "gridPos": {"h": 3, "w": 24, "x": 0, "y": 26},
+          "id": 10,
+          "type": "text",
+          "title": "View Full Trace Details in Jaeger",
+          "options": {
+            "mode": "markdown",
+            "content": "💡 **To view full trace details in Jaeger UI:**\n\n1. Run: `kubectl port-forward -n jaeger svc/jaeger-query 16686:16686`\n2. Open: http://localhost:16686\n3. Service: `lifecycle-operator`\n4. Click on a trace to see the complete span timeline with all workload deployments\n\n**Filter by app:** Add tag `keptn.deployment.app.name=open5gs`"
           }
         }
       ],
