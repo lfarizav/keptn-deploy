@@ -404,12 +404,24 @@ data:
           },
           "gridPos": {"h": 8, "w": 16, "x": 8, "y": 18},
           "id": 9,
-          "type": "text",
+          "type": "traces",
+          "datasource": {"type": "jaeger", "uid": "jaeger"},
+          "targets": [{
+            "datasource": {"type": "jaeger", "uid": "jaeger"},
+            "queryType": "search",
+            "refId": "A",
+            "service": "lifecycle-operator",
+            "limit": 20
+          }],
+          "title": "Deployment Traces",
           "options": {
-            "mode": "markdown",
-            "content": "## Deployment Traces\n\nView deployment traces in Jaeger:\n\n**Access Jaeger UI:**\n```bash\nkubectl port-forward -n jaeger svc/jaeger-query 16686:16686\n```\n\nThen open: **http://localhost:16686/search?service=lifecycle-operator**\n\n**Or use NodePort:** http://NODE_IP:30686/search?service=lifecycle-operator\n\nTraces show:\n- Pre-deployment tasks\n- Workload deployment phases  \n- Post-deployment evaluations\n- Full deployment timeline with spans\n\n**Tip:** Filter by tag `keptn.deployment.app.name=open5gs` in Jaeger to see only Open5GS deployments."
+            "spanBarOptions": {"type": "duration"},
+            "nodeWidth": 0.9
           },
-          "title": "Deployment Traces"
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          }
         }
       ],
       "refresh": "10s",
