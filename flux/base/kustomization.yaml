@@ -12,7 +12,6 @@ resources:
 - grafana-dashboard-keptn-overview.yaml
 - grafana-dashboard-keptn-applications.yaml
 - grafana-dashboard-keptn-workloads.yaml
-- grafana-dashboard-keptn-enhanced.yaml
 - slack-provider.yaml
 - slack-notif-alert.yaml
 
