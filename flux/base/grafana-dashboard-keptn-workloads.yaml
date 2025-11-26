@@ -64,7 +64,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(keptn_workload_active)",
+            "expr": "count(count by (keptn_deployment_workload_name) (keptn_deployment_active))",
             "refId": "A"
           }],
           "title": "Total Active Workloads",
@@ -100,7 +100,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(keptn_workload_deployment_active)",
+            "expr": "sum(keptn_deployment_active)",
             "refId": "A"
           }],
           "title": "Active Workload Deployments",
@@ -129,7 +129,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(keptn_workload_deployment_count_total{keptn_deployment_workload_status=\"Succeeded\"})",
+            "expr": "sum(keptn_deployment_count_total{keptn_deployment_workload_status=\"Succeeded\"})",
             "refId": "A"
           }],
           "title": "Successful Workload Deployments",
@@ -158,7 +158,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(keptn_workload_deployment_count_total{keptn_deployment_workload_status=\"Failed\"})",
+            "expr": "sum(keptn_deployment_count_total{keptn_deployment_workload_status=\"Failed\"})",
             "refId": "A"
           }],
           "title": "Failed Workload Deployments",
@@ -221,7 +221,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_workload_deploymentduration",
+            "expr": "keptn_deployment_deploymentduration",
             "legendFormat": "{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
             "refId": "A"
           }],
@@ -277,7 +277,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_workload_deploymentinterval",
+            "expr": "time() - keptn_deployment_deploymentduration",
             "legendFormat": "{{keptn_deployment_workload_name}}",
             "refId": "A"
           }],
@@ -334,7 +334,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum by (keptn_deployment_workload_name) (keptn_workload_active)",
+            "expr": "count by (keptn_deployment_workload_name) (keptn_deployment_active)",
             "legendFormat": "{{keptn_deployment_workload_name}}",
             "refId": "A"
           }],
@@ -395,7 +395,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_workload_deployment_active",
+            "expr": "keptn_deployment_active",
             "format": "table",
             "instant": true,
             "refId": "A"
