@@ -202,6 +202,65 @@ data:
         {
           "collapsed": false,
           "gridPos": {"h": 1, "w": 24, "x": 0, "y": 8},
+          "id": 150,
+          "panels": [],
+          "title": "Deployment Traces",
+          "type": "row"
+        },
+        {
+          "datasource": {"type": "jaeger", "uid": "jaeger"},
+          "gridPos": {"h": 8, "w": 24, "x": 0, "y": 9},
+          "id": 151,
+          "options": {
+            "showHeader": true,
+            "footer": {"show": false}
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {"align": "left", "displayMode": "auto"},
+              "links": [{
+                "title": "View Trace in Jaeger",
+                "url": "http://localhost:16686/trace/${__data.fields.traceID}"
+              }]
+            },
+            "overrides": [
+              {
+                "matcher": {"id": "byName", "options": "startTime"},
+                "properties": [{"id": "custom.width", "value": 180}]
+              },
+              {
+                "matcher": {"id": "byName", "options": "traceID"},
+                "properties": [{"id": "custom.width", "value": 250}, {"id": "links", "value": [{"title": "View in Jaeger", "url": "http://localhost:16686/trace/${__value.text}"}]}]
+              }
+            ]
+          },
+          "targets": [{
+            "datasource": {"type": "jaeger", "uid": "jaeger"},
+            "queryType": "search",
+            "refId": "A",
+            "service": "lifecycle-operator",
+            "limit": 20
+          }],
+          "title": "Recent Keptn Deployment Traces (click Trace ID to view details)",
+          "type": "table",
+          "transformations": [{
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "startTime": "Time",
+                "traceID": "Trace ID",
+                "traceName": "Operation",
+                "duration": "Duration (ms)"
+              }
+            }
+          }],
+          "description": "Recent deployment traces from Keptn lifecycle operator. Click Trace ID to view full trace in Jaeger."
+        },
+        {
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
           "id": 200,
           "panels": [],
           "title": "Performance Trends",
@@ -236,7 +295,7 @@ data:
               "unit": "short"
             }
           },
-          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 9},
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
           "id": 6,
           "options": {
             "legend": {
@@ -292,7 +351,7 @@ data:
               "unit": "s"
             }
           },
-          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 9},
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
           "id": 7,
           "options": {
             "legend": {
@@ -314,7 +373,7 @@ data:
         },
         {
           "collapsed": false,
-          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 26},
           "id": 300,
           "panels": [],
           "title": "Workloads & Traces",
@@ -350,7 +409,7 @@ data:
               }
             ]
           },
-          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 18},
+          "gridPos": {"h": 8, "w": 8, "x": 0, "y": 27},
           "id": 8,
           "options": {
             "footer": {"fields": "", "reducer": ["sum"], "show": false},
@@ -402,7 +461,7 @@ data:
               "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
             }
           },
-          "gridPos": {"h": 8, "w": 16, "x": 8, "y": 18},
+          "gridPos": {"h": 8, "w": 16, "x": 8, "y": 27},
           "id": 9,
           "options": {
             "footer": {"fields": "", "reducer": ["sum"], "show": false},
