@@ -1,641 +1,444 @@
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-keptn-workloads-dora
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
 data:
-  grafana_dashboard_workloads.json: |-
+  keptn-workloads.json: |
     {
       "annotations": {
-        "list": [
-          {
-            "builtIn": 1,
-            "datasource": {
-              "type": "grafana",
-              "uid": "-- Grafana --"
-            },
-            "enable": true,
-            "hide": true,
-            "iconColor": "rgba(0, 211, 255, 1)",
-            "name": "Annotations & Alerts",
-            "target": {
-              "limit": 100,
-              "matchAny": false,
-              "tags": [],
-              "type": "dashboard"
-            },
-            "type": "dashboard"
-          }
-        ]
+        "list": [{
+          "builtIn": 1,
+          "datasource": {"type": "grafana", "uid": "-- Grafana --"},
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }]
       },
       "editable": true,
       "fiscalYearStartMonth": 0,
-      "graphTooltip": 0,
-      "id": 28,
+      "graphTooltip": 1,
+      "id": null,
       "links": [],
-      "liveNow": false,
+      "liveNow": true,
       "panels": [
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 0},
+          "id": 100,
+          "panels": [],
+          "title": "Workload Overview",
+          "type": "row"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "fixedColor": "green",
-                "mode": "fixed"
-              },
+              "color": {"mode": "thresholds"},
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  }
+                  {"color": "blue", "value": null},
+                  {"color": "green", "value": 5},
+                  {"color": "yellow", "value": 10}
                 ]
-              }
-            },
-            "overrides": []
+              },
+              "unit": "short"
+            }
           },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 0,
-            "y": 0
-          },
-          "id": 12,
+          "gridPos": {"h": 6, "w": 6, "x": 0, "y": 1},
+          "id": 1,
           "options": {
             "colorMode": "value",
             "graphMode": "area",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
             "textMode": "auto"
           },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "count(keptn_deployment_count_total{keptn_deployment_workload_name=\"$Workload\", keptn_deployment_workload_status=\"Succeeded\"})",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Succeeded",
+          "pluginVersion": "9.5.3",
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "sum(keptn_workload_active)",
+            "refId": "A"
+          }],
+          "title": "Total Active Workloads",
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
+              "color": {"mode": "thresholds"},
               "mappings": [],
-              "min": 2,
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "#EAB839",
-                    "value": 43200
-                  },
-                  {
-                    "color": "red",
-                    "value": 86400
-                  }
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 1},
+                  {"color": "red", "value": 3}
                 ]
               },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 10,
-            "x": 3,
-            "y": 0
-          },
-          "id": 16,
-          "options": {
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "mean"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
-          },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "avg by(keptn_deployment_workload_previousversion, keptn_deployment_workload_version) (keptn_deployment_deploymentinterval{keptn_deployment_workload_name=\"$Workload\"})",
-              "format": "table",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
+              "unit": "short"
             }
-          ],
-          "title": "Average Time between Deployments",
-          "type": "gauge"
+          },
+          "gridPos": {"h": 6, "w": 6, "x": 6, "y": 1},
+          "id": 2,
+          "options": {
+            "colorMode": "background",
+            "graphMode": "area",
+            "justifyMode": "center",
+            "orientation": "auto",
+            "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.5.3",
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "sum(keptn_workload_deployment_active)",
+            "refId": "A"
+          }],
+          "title": "Active Workload Deployments",
+          "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "fixedColor": "red",
-                "mode": "fixed"
-              },
+              "color": {"fixedColor": "green", "mode": "fixed"},
               "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "red",
-                    "value": null
-                  }
-                ]
-              }
-            },
-            "overrides": []
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            }
           },
-          "gridPos": {
-            "h": 6,
-            "w": 3,
-            "x": 13,
-            "y": 0
-          },
+          "gridPos": {"h": 6, "w": 6, "x": 12, "y": 1},
           "id": 3,
           "options": {
             "colorMode": "value",
             "graphMode": "area",
-            "justifyMode": "auto",
+            "justifyMode": "center",
             "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "text": {
-              "valueSize": 100
-            },
+            "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false},
             "textMode": "auto"
           },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "count(keptn_deployment_count_total{keptn_deployment_workload_name=\"$Workload\", keptn_deployment_workload_status=\"Failed\"})",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Failed",
+          "pluginVersion": "9.5.3",
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "sum(keptn_workload_deployment_count_total{keptn_deployment_workload_status=\"Succeeded\"})",
+            "refId": "A"
+          }],
+          "title": "Successful Workload Deployments",
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
+              "color": {"fixedColor": "red", "mode": "fixed"},
               "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 0,
-            "y": 6
-          },
-          "id": 14,
-          "options": {
-            "displayMode": "gradient",
-            "minVizHeight": 10,
-            "minVizWidth": 0,
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "max by(keptn_deployment_workload_version) (keptn_deployment_deploymentduration{keptn_deployment_workload_name=\"$Workload\"})",
-              "format": "table",
-              "interval": "",
-              "legendFormat": "{{keptn_workload_version}}",
-              "range": true,
-              "refId": "A"
+              "thresholds": {"mode": "absolute", "steps": [{"color": "red", "value": null}]},
+              "unit": "short"
             }
-          ],
-          "title": "Deployment Time",
-          "type": "bargauge"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
           },
-          "fieldConfig": {
-            "defaults": {
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "orange",
-                    "value": 5
-                  },
-                  {
-                    "color": "red",
-                    "value": 10
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 6,
-            "x": 5,
-            "y": 6
-          },
+          "gridPos": {"h": 6, "w": 6, "x": 18, "y": 1},
           "id": 4,
           "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "center",
             "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showThresholdLabels": false,
-            "showThresholdMarkers": true
+            "reduceOptions": {"calcs": ["sum"], "fields": "", "values": false},
+            "textMode": "auto"
           },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "max(keptn_deployment_active{keptn_deployment_workload_name=\"$Workload\"})",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Active Deployments",
-          "type": "gauge"
+          "pluginVersion": "9.5.3",
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "sum(keptn_workload_deployment_count_total{keptn_deployment_workload_status=\"Failed\"})",
+            "refId": "A"
+          }],
+          "title": "Failed Workload Deployments",
+          "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 7},
+          "id": 200,
+          "panels": [],
+          "title": "Workload Performance",
+          "type": "row"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
+              "color": {"mode": "palette-classic"},
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Duration",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "line"}
               },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 180},
+                  {"color": "red", "value": 300}
                 ]
               },
               "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 6
-          },
-          "id": 10,
-          "options": {
-            "displayMode": "gradient",
-            "minVizHeight": 10,
-            "minVizWidth": 0,
-            "orientation": "horizontal",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "showUnfilled": true
-          },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "builder",
-              "expr": "avg by(keptn_deployment_workload_previousversion, keptn_deployment_workload_version) (keptn_deployment_deploymentinterval{keptn_deployment_workload_name=\"$Workload\"})",
-              "format": "table",
-              "legendFormat": "{{keptn_deployment_workload_previousversion}} - {{keptn_deployment_workload_version}}",
-              "range": true,
-              "refId": "A"
             }
-          ],
-          "title": "Time between Deployments",
-          "type": "bargauge"
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 0, "y": 8},
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max", "min"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "keptn_workload_deploymentduration",
+            "legendFormat": "{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
+            "refId": "A"
+          }],
+          "title": "Workload Deployment Duration",
+          "type": "timeseries"
         },
         {
-          "datasource": {
-            "type": "jaeger",
-            "uid": "PC9A941E8F2E49454"
-          },
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "thresholds"
-              },
+              "color": {"mode": "palette-classic"},
               "custom": {
-                "align": "auto",
-                "displayMode": "auto",
-                "inspect": false
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "Interval",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 20,
+                "gradientMode": "opacity",
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
+                "lineInterpolation": "smooth",
+                "lineWidth": 2,
+                "pointSize": 5,
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {"group": "A", "mode": "none"},
+                "thresholdsStyle": {"mode": "off"}
               },
               "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
+                  {"color": "green", "value": null},
+                  {"color": "yellow", "value": 43200},
+                  {"color": "red", "value": 86400}
                 ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 11,
-            "x": 0,
-            "y": 12
-          },
-          "id": 8,
-          "options": {
-            "footer": {
-              "fields": "",
-              "reducer": [
-                "sum"
-              ],
-              "show": false
-            },
-            "showHeader": true
-          },
-          "pluginVersion": "9.2.1",
-          "targets": [
-            {
-              "datasource": {
-                "type": "jaeger",
-                "uid": "PC9A941E8F2E49454"
               },
-              "operation": "$Workload/WorkloadPreDeployTasks",
-              "queryType": "search",
-              "refId": "A",
-              "service": "lifecycle-operator",
-              "tags": ""
+              "unit": "s"
             }
-          ],
-          "title": "Traces",
-          "type": "table"
+          },
+          "gridPos": {"h": 9, "w": 12, "x": 12, "y": 8},
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": ["mean", "lastNotNull", "max"],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {"mode": "multi", "sort": "desc"}
+          },
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "keptn_workload_deploymentinterval",
+            "legendFormat": "{{keptn_deployment_workload_name}}",
+            "refId": "A"
+          }],
+          "title": "Workload Deployment Frequency (Interval)",
+          "type": "timeseries"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
+          "collapsed": false,
+          "gridPos": {"h": 1, "w": 24, "x": 0, "y": 17},
+          "id": 300,
+          "panels": [],
+          "title": "Workload Activity",
+          "type": "row"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
           "fieldConfig": {
             "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
+              "color": {"mode": "palette-classic"},
               "custom": {
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
-                "drawStyle": "line",
-                "fillOpacity": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 80,
                 "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
+                "hideFrom": {"legend": false, "tooltip": false, "viz": false},
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
+                "scaleDistribution": {"type": "linear"},
+                "showPoints": "never",
                 "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
+                "stacking": {"group": "A", "mode": "normal"},
+                "thresholdsStyle": {"mode": "off"}
               },
               "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]},
+              "unit": "short"
+            }
           },
-          "gridPos": {
-            "h": 6,
-            "w": 5,
-            "x": 11,
-            "y": 12
-          },
-          "id": 6,
+          "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+          "id": 7,
           "options": {
             "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
+              "calcs": ["sum"],
+              "displayMode": "table",
+              "placement": "right",
               "showLegend": true
             },
-            "tooltip": {
-              "mode": "single",
-              "sort": "none"
-            }
+            "tooltip": {"mode": "multi", "sort": "desc"}
           },
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "sum by (keptn_deployment_workload_name) (keptn_workload_active)",
+            "legendFormat": "{{keptn_deployment_workload_name}}",
+            "refId": "A"
+          }],
+          "title": "Active Workloads Over Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {"type": "prometheus", "uid": "prometheus"},
+          "fieldConfig": {
+            "defaults": {
+              "color": {"mode": "thresholds"},
+              "custom": {
+                "align": "left",
+                "displayMode": "color-background",
+                "inspect": false
               },
-              "editorMode": "builder",
-              "expr": "max(keptn_deployment_active{keptn_deployment_workload_name=\"$Workload\"})",
-              "format": "time_series",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
+              "mappings": [
+                {
+                  "options": {
+                    "0": {"color": "green", "index": 0, "text": "Idle"},
+                    "1": {"color": "yellow", "index": 1, "text": "Deploying"}
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}
+            },
+            "overrides": [
+              {
+                "matcher": {"id": "byName", "options": "keptn_deployment_workload_name"},
+                "properties": [
+                  {"id": "displayName", "value": "Workload"},
+                  {"id": "custom.width", "value": 250}
+                ]
+              },
+              {
+                "matcher": {"id": "byName", "options": "keptn_deployment_workload_version"},
+                "properties": [
+                  {"id": "displayName", "value": "Version"},
+                  {"id": "custom.width", "value": 120}
+                ]
+              },
+              {
+                "matcher": {"id": "byName", "options": "Value"},
+                "properties": [
+                  {"id": "displayName", "value": "Status"},
+                  {"id": "custom.width", "value": 100}
+                ]
+              }
+            ]
+          },
+          "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+          "id": 8,
+          "options": {
+            "footer": {"fields": "", "reducer": ["sum"], "show": false},
+            "showHeader": true
+          },
+          "pluginVersion": "9.5.3",
+          "targets": [{
+            "datasource": {"type": "prometheus", "uid": "prometheus"},
+            "expr": "keptn_workload_deployment_active",
+            "format": "table",
+            "instant": true,
+            "refId": "A"
+          }],
+          "title": "Workload Deployment Status",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "__name__": true,
+                  "instance": true,
+                  "job": true,
+                  "keptn_deployment_app_name": true,
+                  "keptn_deployment_app_namespace": true,
+                  "namespace": true,
+                  "pod": true,
+                  "service": true
+                },
+                "indexByName": {},
+                "renameByName": {}
+              }
             }
           ],
-          "title": "Deployments Active",
-          "type": "timeseries"
+          "type": "table"
         }
       ],
-      "refresh": "5s",
-      "schemaVersion": 37,
+      "refresh": "10s",
+      "schemaVersion": 38,
       "style": "dark",
-      "tags": [],
-      "templating": {
-        "list": [
-          {
-            "current": {
-              "isNone": true,
-              "selected": false,
-              "text": "None",
-              "value": ""
-            },
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus"
-            },
-            "definition": "label_values(keptn_deployment_workload_name)",
-            "hide": 0,
-            "includeAll": false,
-            "multi": false,
-            "name": "Workload",
-            "options": [],
-            "query": {
-              "query": "label_values(keptn_deployment_workload_name)",
-              "refId": "StandardVariableQuery"
-            },
-            "refresh": 1,
-            "regex": "",
-            "skipUrlSync": false,
-            "sort": 0,
-            "type": "query"
-          }
-        ]
-      },
-      "time": {
-        "from": "now-5m",
-        "to": "now"
-      },
+      "tags": ["keptn", "workloads", "dora"],
+      "templating": {"list": []},
+      "time": {"from": "now-6h", "to": "now"},
       "timepicker": {},
       "timezone": "",
       "title": "Keptn Workloads DORA",
-      "uid": "hIXRvXS4k",
+      "uid": "keptn-workloads-dora",
       "version": 1,
       "weekStart": ""
     }
 kind: ConfigMap
 metadata:
-  creationTimestamp: null
   name: grafana-dashboard-keptn-workloads-dora
   namespace: monitoring
   labels:
