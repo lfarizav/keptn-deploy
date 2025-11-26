@@ -9,7 +9,6 @@ resources:
 - keptn-observability-configmap.yaml
 - keptn-servicemonitor.yaml
 - grafana-datasources.yaml
-- grafana-datasource-jaeger.yaml
 - grafana-dashboard-keptn-overview.yaml
 - grafana-dashboard-keptn-applications.yaml
 - grafana-dashboard-keptn-workloads.yaml
