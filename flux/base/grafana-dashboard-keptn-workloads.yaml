@@ -65,6 +65,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "count(count by (keptn_deployment_workload_name) (keptn_deployment_active))",
+            "legendFormat": "Workloads",
             "refId": "A"
           }],
           "title": "Total Active Workloads",
@@ -101,6 +102,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_deployment_active)",
+            "legendFormat": "Active",
             "refId": "A"
           }],
           "title": "Active Workload Deployments",
@@ -130,6 +132,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_deployment_count_total{keptn_deployment_workload_status=\"Succeeded\"})",
+            "legendFormat": "Succeeded",
             "refId": "A"
           }],
           "title": "Successful Workload Deployments",
@@ -159,6 +162,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_deployment_count_total{keptn_deployment_workload_status=\"Failed\"})",
+            "legendFormat": "Failed",
             "refId": "A"
           }],
           "title": "Failed Workload Deployments",
@@ -395,7 +399,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_deployment_active",
+            "expr": "max(keptn_deployment_active) by (keptn_deployment_workload_name, keptn_deployment_workload_version)",
             "format": "table",
             "instant": true,
             "refId": "A"
@@ -414,7 +418,9 @@ data:
                   "keptn_deployment_app_namespace": true,
                   "namespace": true,
                   "pod": true,
-                  "service": true
+                  "service": true,
+                  "endpoint": true,
+                  "container": true
                 },
                 "indexByName": {},
                 "renameByName": {}

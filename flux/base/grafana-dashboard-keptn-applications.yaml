@@ -59,6 +59,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_count_total{keptn_deployment_app_status=\"Succeeded\", keptn_deployment_app_name=\"$Application\"})",
+            "legendFormat": "Succeeded",
             "refId": "A"
           }],
           "title": "Succeeded",
@@ -93,6 +94,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "max(keptn_app_active{keptn_deployment_app_name=\"$Application\"})",
+            "legendFormat": "Active",
             "refId": "A"
           }],
           "title": "Active Deployments",
@@ -123,6 +125,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_count_total{keptn_deployment_app_status=\"Failed\", keptn_deployment_app_name=\"$Application\"})",
+            "legendFormat": "Failed",
             "refId": "A"
           }],
           "title": "Failed",
@@ -157,6 +160,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "avg(keptn_app_deploymentinterval{keptn_deployment_app_name=\"$Application\"})",
+            "legendFormat": "Interval",
             "refId": "A"
           }],
           "title": "Avg Time Between Deployments",
@@ -359,7 +363,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_deployment_deploymentduration{keptn_deployment_app_name=\"$Application\"}",
+            "expr": "max(keptn_deployment_deploymentduration{keptn_deployment_app_name=\"$Application\"}) by (keptn_deployment_workload_name, keptn_deployment_workload_version)",
             "format": "table",
             "instant": true,
             "refId": "A"
@@ -379,7 +383,9 @@ data:
                   "keptn_deployment_app_namespace": true,
                   "namespace": true,
                   "pod": true,
-                  "service": true
+                  "service": true,
+                  "endpoint": true,
+                  "container": true
                 },
                 "indexByName": {},
                 "renameByName": {}

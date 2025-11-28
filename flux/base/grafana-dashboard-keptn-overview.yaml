@@ -66,6 +66,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_count_total)",
+            "legendFormat": "Applications",
             "refId": "A"
           }],
           "title": "Total Applications",
@@ -102,6 +103,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_active)",
+            "legendFormat": "Active Apps",
             "refId": "A"
           }],
           "title": "Active Apps",
@@ -138,6 +140,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_deployment_active)",
+            "legendFormat": "Active Deployments",
             "refId": "A"
           }],
           "title": "Active Deployments",
@@ -174,6 +177,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_workload_active)",
+            "legendFormat": "Active Workloads",
             "refId": "A"
           }],
           "title": "Active Workloads",
@@ -206,6 +210,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_count_total{keptn_deployment_app_status=\"Succeeded\"})",
+            "legendFormat": "Succeeded",
             "refId": "A"
           }],
           "title": "Succeeded",
@@ -238,6 +243,7 @@ data:
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
             "expr": "sum(keptn_app_count_total{keptn_deployment_app_status=\"Failed\"})",
+            "legendFormat": "Failed",
             "refId": "A"
           }],
           "title": "Failed",
