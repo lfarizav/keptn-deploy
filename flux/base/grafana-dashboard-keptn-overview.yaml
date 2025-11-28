@@ -474,11 +474,11 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(rate(keptn_app_count_total[5m])) by (keptn_deployment_app_name) * 3600",
+            "expr": "sum(keptn_app_count_total{keptn_deployment_app_status=\"Succeeded\"}) by (keptn_deployment_app_name)",
             "legendFormat": "{{keptn_deployment_app_name}}",
             "refId": "A"
           }],
-          "title": "Deployment Frequency (Deployments per Hour)",
+          "title": "Total Successful Deployments",
           "type": "timeseries"
         }
       ],
