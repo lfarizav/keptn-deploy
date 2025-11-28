@@ -159,11 +159,11 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "avg(keptn_app_deploymentinterval{keptn_deployment_app_name=\"$Application\"})",
-            "legendFormat": "Interval",
+            "expr": "avg(keptn_app_deploymentduration{keptn_deployment_app_name=\"$Application\"})",
+            "legendFormat": "Avg Duration",
             "refId": "A"
           }],
-          "title": "Avg Time Between Deployments",
+          "title": "Avg Deployment Duration",
           "type": "gauge"
         },
         {
