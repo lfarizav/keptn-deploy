@@ -176,7 +176,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "sum(keptn_workload_active)",
+            "expr": "sum(keptn_deployment_active)",
             "legendFormat": "Active Workloads",
             "refId": "A"
           }],
@@ -474,11 +474,11 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "max(keptn_app_deploymentinterval) by (keptn_deployment_app_name)",
+            "expr": "sum(rate(keptn_app_count_total[5m])) by (keptn_deployment_app_name) * 3600",
             "legendFormat": "{{keptn_deployment_app_name}}",
             "refId": "A"
           }],
-          "title": "Deployment Frequency (Interval Between Deployments)",
+          "title": "Deployment Frequency (Deployments per Hour)",
           "type": "timeseries"
         }
       ],
