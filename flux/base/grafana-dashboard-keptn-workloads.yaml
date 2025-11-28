@@ -225,7 +225,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "keptn_deployment_deploymentduration",
+            "expr": "max(keptn_deployment_deploymentduration) by (keptn_deployment_workload_name, keptn_deployment_workload_version)",
             "legendFormat": "{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
             "refId": "A"
           }],
@@ -281,7 +281,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "time() - keptn_deployment_deploymentduration",
+            "expr": "max(time() - keptn_deployment_deploymentduration) by (keptn_deployment_workload_name)",
             "legendFormat": "{{keptn_deployment_workload_name}}",
             "refId": "A"
           }],
