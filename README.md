@@ -687,6 +687,36 @@ kubectl run -it --rm debug --image=curlimages/curl --restart=Never -- \
   curl "http://prometheus-server.monitoring:9090/api/v1/query?query=up"
 ```
 
+**⚠️ Grafana Dashboards Showing "No Data"**
+
+If Keptn dashboards show "No data" despite Keptn being deployed:
+
+1. **Verify metrics exist at source:**
+   ```bash
+   kubectl run curl-test --image=curlimages/curl:latest --rm -i --restart=Never -n keptn-system -- \
+     curl -s http://lifecycle-operator-metrics-service:2222/metrics | grep '^keptn' | head -20
+   ```
+
+2. **Check if Prometheus is scraping:**
+   ```bash
+   kubectl run curl-test --image=curlimages/curl:latest --rm -i --restart=Never -n monitoring -- \
+     curl -s "http://prom-kube-prometheus-stack-prometheus:9090/api/v1/query?query=keptn_deployment_deploymentduration"
+   ```
+
+3. **If metrics exist but aren't in Prometheus, restart Prometheus:**
+   ```bash
+   kubectl delete pod -n monitoring prometheus-prom-kube-prometheus-stack-prometheus-0
+   ```
+   
+   Wait ~30 seconds for Prometheus to restart and re-discover ServiceMonitors.
+
+4. **Verify ServiceMonitors have correct labels:**
+   ```bash
+   kubectl get servicemonitor -n keptn-system -o yaml | grep "release: prom"
+   ```
+
+See [KEPTN_METRICS_TROUBLESHOOTING.md](./KEPTN_METRICS_TROUBLESHOOTING.md) for detailed investigation steps.
+
 ### Common Issues
 
 | Issue | Solution |
