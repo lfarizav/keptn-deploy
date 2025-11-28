@@ -699,6 +699,48 @@ kubectl run -it --rm debug --image=curlimages/curl --restart=Never -- \
 
 ---
 
+## 🔄 Recent Updates & Improvements
+
+### November 2025
+**🎯 Grafana Dashboard Quality Improvements**
+
+All Keptn Grafana dashboards have been fixed to eliminate duplicate metrics and improve user experience:
+
+#### Keptn Overview Dashboard
+- ✅ Added `legendFormat` to 6 stat panels for clean display
+  - Total Applications, Active Apps, Active Deployments, Active Workloads, Succeeded, Failed
+- ✅ All metrics now show user-friendly labels instead of raw Prometheus queries
+
+#### Keptn Applications Dashboard
+- ✅ Added `legendFormat` to 4 stat/gauge panels
+  - Succeeded, Active Deployments, Failed, Avg Time Between Deployments
+- ✅ Fixed "Active Workloads" table showing duplicate rows
+  - Changed from raw metric to `max() by (workload_name, version)` aggregation
+  - Added endpoint/container to excludeByName transformation
+- ✅ Clean single-row entries per workload
+
+#### Keptn Workloads DORA Dashboard
+- ✅ Added `legendFormat` to 4 stat panels
+  - Total Active Workloads, Active Deployments, Succeeded, Failed
+- ✅ Fixed "Workload Deployment Status" table duplicates
+  - Aggregated with `max() by (workload_name, version)`
+  - Excluded infrastructure labels (pod, instance, endpoint, job, service, namespace, container)
+- ✅ Clean single-row status per workload
+
+#### Technical Root Cause
+**Problem**: Prometheus ServiceMonitor creates multiple metric series with infrastructure labels (pod, instance, endpoint, job, service, namespace, container), causing:
+- Stat panels showing raw Prometheus functions instead of friendly labels
+- Table panels creating duplicate rows for the same workload/application
+
+**Solution Applied**:
+- **Stat/Gauge panels**: Added `legendFormat` for user-friendly display
+- **Table queries**: Aggregated with `max() by (business_label)` to get one value per logical entity
+- **Table transformations**: Excluded all infrastructure labels to show only relevant data
+
+All dashboards now display clean, single-value metrics and single-row tables without duplicates.
+
+---
+
 ## 🔐 Security
 
 ### RBAC
