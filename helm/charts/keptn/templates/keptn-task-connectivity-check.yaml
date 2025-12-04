@@ -1,0 +1,100 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: core-network-connectivity
+  namespace: keptn-system
+spec:
+  container:
+    name: connectivity-checker
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/bash
+      - -c
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "=========================================="
+        echo "Keptn Post-Deployment: Connectivity Check"
+        echo "=========================================="
+        echo ""
+        
+        NAMESPACE="k8s-open5gs"
+        VALIDATION_FAILED=0
+        
+        print_result() {
+          if [ $1 -eq 0 ]; then
+            echo "✓ PASS: $2"
+          else
+            echo "✗ FAIL: $2"
+            VALIDATION_FAILED=1
+          fi
+        }
+        
+        # Wait for pods to stabilize
+        echo "Waiting 30 seconds for core network to stabilize..."
+        sleep 30
+        
+        echo ""
+        echo "=== Pod Status Validation ==="
+        echo ""
+        
+        # Check all pods are running
+        NOT_RUNNING=$(kubectl get pods -n $NAMESPACE -o json | jq -r '.items[] | select(.status.phase != "Running" and .status.phase != "Succeeded") | .metadata.name' | wc -l)
+        TOTAL_PODS=$(kubectl get pods -n $NAMESPACE --no-headers | wc -l)
+        RUNNING_PODS=$((TOTAL_PODS - NOT_RUNNING))
+        
+        echo "  Running pods: ${RUNNING_PODS}/${TOTAL_PODS}"
+        print_result $([ $NOT_RUNNING -eq 0 ] && echo 0 || echo 1) "All pods are Running or Succeeded"
+        
+        # Check pod restart counts
+        HIGH_RESTARTS=$(kubectl get pods -n $NAMESPACE -o json | jq -r '.items[] | select(.status.containerStatuses != null) | select(.status.containerStatuses[0].restartCount > 3) | .metadata.name' | wc -l)
+        print_result $([ $HIGH_RESTARTS -eq 0 ] && echo 0 || echo 1) "No pods have excessive restarts (>3)"
+        
+        echo ""
+        echo "=== Service Connectivity ==="
+        echo ""
+        
+        # Verify critical services are accessible
+        CRITICAL_SERVICES="nrf smf amf upf mongodb"
+        
+        for svc in $CRITICAL_SERVICES; do
+          SVC_NAME="k8s-${svc}"
+          SVC_EXISTS=$(kubectl get svc $SVC_NAME -n $NAMESPACE 2>/dev/null | grep -v "NAME" | wc -l || echo 0)
+          
+          if [ $SVC_EXISTS -gt 0 ]; then
+            echo "✓ Service exists: $SVC_NAME"
+          else
+            echo "✗ Service missing: $SVC_NAME"
+            VALIDATION_FAILED=1
+          fi
+        done
+        
+        echo ""
+        echo "=== Core Network Function Health ==="
+        echo ""
+        
+        # Check readiness of core NFs
+        for nf in nrf smf amf upf ausf udm udr pcf; do
+          READY=$(kubectl get pods -n $NAMESPACE -l app=$nf -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "NotFound")
+          
+          if [ "$READY" == "True" ]; then
+            echo "✓ Ready: $nf"
+          elif [ "$READY" == "NotFound" ]; then
+            echo "⚠ Not deployed: $nf (may be disabled)"
+          else
+            echo "✗ Not ready: $nf"
+            VALIDATION_FAILED=1
+          fi
+        done
+        
+        echo ""
+        echo "=========================================="
+        if [ $VALIDATION_FAILED -eq 0 ]; then
+          echo "✓ Core network connectivity check PASSED"
+          exit 0
+        else
+          echo "✗ Core network connectivity check FAILED"
+          exit 1
+        fi

@@ -1,0 +1,38 @@
+---
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: open5gs-running-pods
+  namespace: k8s-open5gs
+spec:
+  provider:
+    name: prometheus
+  query: 'count(kube_pod_status_phase{namespace="k8s-open5gs",phase="Running"})'
+  fetchIntervalSeconds: 10
+---
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: open5gs-pod-restarts
+  namespace: k8s-open5gs
+spec:
+  provider:
+    name: prometheus
+  query: 'max(kube_pod_container_status_restarts_total{namespace="k8s-open5gs"}) OR on() vector(0)'
+  fetchIntervalSeconds: 10
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnEvaluationDefinition
+metadata:
+  name: pod-health-check
+  namespace: k8s-open5gs
+spec:
+  objectives:
+    - keptnMetricRef:
+        name: open5gs-running-pods
+        namespace: k8s-open5gs
+      evaluationTarget: ">10"  # Expect at least 10 pods running (core NFs + MongoDB + gNB)
+    - keptnMetricRef:
+        name: open5gs-pod-restarts
+        namespace: k8s-open5gs
+      evaluationTarget: "<5"    # Max 5 restarts acceptable

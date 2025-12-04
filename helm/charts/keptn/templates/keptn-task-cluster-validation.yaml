@@ -1,0 +1,112 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: cluster-validation
+  namespace: keptn-system
+spec:
+  container:
+    name: cluster-validator
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/bash
+      - -c
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "=========================================="
+        echo "Keptn Pre-Deployment: Cluster Validation"
+        echo "=========================================="
+        echo ""
+        
+        VALIDATION_FAILED=0
+        
+        # Minimum resource requirements
+        MIN_CPU_CORES=4
+        MIN_MEMORY_GB=8
+        
+        # Function to print test results
+        print_result() {
+          if [ $1 -eq 0 ]; then
+            echo "✓ PASS: $2"
+          else
+            echo "✗ FAIL: $2"
+            VALIDATION_FAILED=1
+          fi
+        }
+        
+        echo "=== Cluster Resource Availability ==="
+        echo ""
+        
+        # Total allocatable CPU across all nodes
+        TOTAL_CPU_MILLICORES=$(kubectl get nodes -o json | jq -r '.items[].status.allocatable.cpu' | sed 's/m$//' | awk '{if($1 ~ /m$/) {s+=$1} else {s+=$1*1000}} END {print s}')
+        TOTAL_CPU=$(awk "BEGIN {printf \"%.0f\", $TOTAL_CPU_MILLICORES / 1000}")
+        echo "  Total allocatable CPU: ${TOTAL_CPU} cores"
+        print_result $([ $TOTAL_CPU -ge $MIN_CPU_CORES ] && echo 0 || echo 1) "Cluster has sufficient CPU (${TOTAL_CPU} >= ${MIN_CPU_CORES} cores)"
+        
+        # Total allocatable memory
+        TOTAL_MEMORY_KB=$(kubectl get nodes -o json | jq -r '.items[].status.allocatable.memory' | sed 's/Ki$//' | awk '{s+=$1} END {print s}')
+        TOTAL_MEMORY_GB=$(awk "BEGIN {printf \"%.0f\", $TOTAL_MEMORY_KB / 1024 / 1024}")
+        echo "  Total allocatable memory: ${TOTAL_MEMORY_GB} GB"
+        print_result $([ $TOTAL_MEMORY_GB -ge $MIN_MEMORY_GB ] && echo 0 || echo 1) "Cluster has sufficient memory (${TOTAL_MEMORY_GB} >= ${MIN_MEMORY_GB} GB)"
+        
+        # Check storage classes
+        STORAGE_CLASSES=$(kubectl get storageclass -o json | jq -r '.items[].metadata.name' | wc -l)
+        print_result $([ $STORAGE_CLASSES -gt 0 ] && echo 0 || echo 1) "At least one StorageClass available (${STORAGE_CLASSES} found)"
+        
+        echo ""
+        echo "=== Kubernetes API Server Health ==="
+        echo ""
+        
+        # Test API server response time
+        API_START=$(date +%s%N)
+        kubectl get nodes > /dev/null 2>&1
+        API_END=$(date +%s%N)
+        API_RESPONSE_MS=$(( ($API_END - $API_START) / 1000000 ))
+        API_THRESHOLD_MS=1000
+        
+        echo "  API server response time: ${API_RESPONSE_MS}ms"
+        print_result $([ $API_RESPONSE_MS -lt $API_THRESHOLD_MS ] && echo 0 || echo 1) "API server responsive (${API_RESPONSE_MS}ms < ${API_THRESHOLD_MS}ms)"
+        
+        echo ""
+        echo "=== Node Status ==="
+        echo ""
+        
+        # Check all nodes are Ready
+        NOT_READY_NODES=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="Ready" and .status!="True")) | .metadata.name' | wc -l)
+        TOTAL_NODES=$(kubectl get nodes --no-headers | wc -l)
+        READY_NODES=$((TOTAL_NODES - NOT_READY_NODES))
+        
+        echo "  Ready nodes: ${READY_NODES}/${TOTAL_NODES}"
+        print_result $([ $NOT_READY_NODES -eq 0 ] && echo 0 || echo 1) "All nodes are Ready"
+        
+        # Check for nodes with disk pressure
+        DISK_PRESSURE=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="DiskPressure" and .status=="True")) | .metadata.name' | wc -l)
+        print_result $([ $DISK_PRESSURE -eq 0 ] && echo 0 || echo 1) "No nodes with disk pressure"
+        
+        # Check for nodes with memory pressure
+        MEMORY_PRESSURE=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="MemoryPressure" and .status=="True")) | .metadata.name' | wc -l)
+        print_result $([ $MEMORY_PRESSURE -eq 0 ] && echo 0 || echo 1) "No nodes with memory pressure"
+        
+        echo ""
+        echo "=== Required CRDs ==="
+        echo ""
+        
+        # Check for ServiceMonitor CRD
+        SM_CRD=$(kubectl get crd servicemonitors.monitoring.coreos.com 2>/dev/null | grep -v "NAME" | wc -l || echo 0)
+        print_result $([ $SM_CRD -gt 0 ] && echo 0 || echo 1) "ServiceMonitor CRD available"
+        
+        # Check for NetworkPolicy support
+        NP_SUPPORTED=$(kubectl api-resources | grep networkpolicies | wc -l)
+        print_result $([ $NP_SUPPORTED -gt 0 ] && echo 0 || echo 1) "NetworkPolicy resource available"
+        
+        echo ""
+        echo "=========================================="
+        if [ $VALIDATION_FAILED -eq 0 ]; then
+          echo "✓ All cluster validation checks PASSED"
+          exit 0
+        else
+          echo "✗ Some cluster validation checks FAILED"
+          exit 1
+        fi

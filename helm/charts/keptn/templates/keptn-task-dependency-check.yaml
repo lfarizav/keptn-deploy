@@ -1,0 +1,83 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: dependency-check
+  namespace: keptn-system
+spec:
+  container:
+    name: dependency-checker
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/bash
+      - -c
+      - |
+        #!/bin/bash
+        set -e
+        
+        echo "=========================================="
+        echo "Keptn Pre-Deployment: Dependency Check"
+        echo "=========================================="
+        echo ""
+        
+        NAMESPACE="k8s-open5gs"
+        RELEASE="k8s"
+        VALIDATION_FAILED=0
+        
+        print_result() {
+          if [ $1 -eq 0 ]; then
+            echo "✓ PASS: $2"
+          else
+            echo "✗ FAIL: $2"
+            VALIDATION_FAILED=1
+          fi
+        }
+        
+        # Check if this is initial deployment or upgrade
+        EXISTING_PODS=$(kubectl get pods -n $NAMESPACE 2>/dev/null | grep -v "NAME" | wc -l || echo 0)
+        
+        if [ $EXISTING_PODS -eq 0 ]; then
+          echo "Initial deployment detected - no dependency checks needed"
+          echo "Core network components will start in natural order"
+          exit 0
+        fi
+        
+        echo "=== Checking Core Network Dependencies ==="
+        echo ""
+        
+        # For upgrades, verify core components are healthy before proceeding
+        
+        # Check MongoDB is ready (required by NRF, UDM, UDR, PCF, etc.)
+        echo "Checking MongoDB..."
+        MONGO_READY=$(kubectl get pods -n $NAMESPACE -l app=mongodb -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
+        print_result $([ "$MONGO_READY" == "True" ] && echo 0 || echo 1) "MongoDB is ready"
+        
+        # Check NRF is ready (required by all NFs for service discovery)
+        echo "Checking NRF..."
+        NRF_READY=$(kubectl get pods -n $NAMESPACE -l app=nrf -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
+        print_result $([ "$NRF_READY" == "True" ] && echo 0 || echo 1) "NRF is ready"
+        
+        # Verify DNS resolution for critical services
+        echo ""
+        echo "=== DNS Resolution Checks ==="
+        echo ""
+        
+        for service in nrf smf amf; do
+          FQDN="${RELEASE}-${service}.${NAMESPACE}.svc.cluster.local"
+          if nslookup $FQDN 2>/dev/null | grep -q "Address:"; then
+            echo "✓ DNS resolves: $FQDN"
+          else
+            echo "✗ DNS failed: $FQDN"
+            VALIDATION_FAILED=1
+          fi
+        done
+        
+        echo ""
+        echo "=========================================="
+        if [ $VALIDATION_FAILED -eq 0 ]; then
+          echo "✓ All dependency checks PASSED"
+          exit 0
+        else
+          echo "✗ Some dependency checks FAILED"
+          exit 1
+        fi
