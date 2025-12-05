@@ -7,6 +7,8 @@ metadata:
   name: subscriber-loader
   namespace: keptn-system
 spec:
+  retries: 3
+  timeout: 10m
   serviceAccountName: subscriber-loader
   container:
     name: subscriber-loader
