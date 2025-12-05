@@ -10,7 +10,7 @@ spec:
   serviceAccountName: subscriber-loader
   container:
     name: subscriber-loader
-    image: bitnami/kubectl:1.34
+    image: bitnami/kubectl:latest
     command:
       - /bin/bash
       - -c
