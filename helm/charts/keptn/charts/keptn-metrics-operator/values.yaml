@@ -74,7 +74,7 @@ config:
     resourceName: 3f8532ca.keptn.sh
   metrics:
 ## @param      config.metrics.bindAddress MetricsBindAddress is the TCP address that the controller should bind to for serving prometheus metrics. It can be set to "0" to disable the metrics serving.
-    bindAddress: 127.0.0.1:8080
+    bindAddress: 127.0.0.1:2222
   webhook:
 ## @param      config.webhook.port
     port: 9443
