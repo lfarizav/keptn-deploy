@@ -2,7 +2,7 @@
 # Pre-Deployment Analysis Definition
 # Validates cluster readiness before deploying Open5GS
 apiVersion: metrics.keptn.sh/v1beta1
-kind: KeptnAnalysisDefinition
+kind: AnalysisDefinition
 metadata:
   name: pre-deployment-analysis
   namespace: keptn-system
@@ -48,7 +48,7 @@ spec:
 # Post-Deployment Analysis Definition
 # Validates Open5GS deployment success and health
 apiVersion: metrics.keptn.sh/v1beta1
-kind: KeptnAnalysisDefinition
+kind: AnalysisDefinition
 metadata:
   name: post-deployment-analysis
   namespace: keptn-system
