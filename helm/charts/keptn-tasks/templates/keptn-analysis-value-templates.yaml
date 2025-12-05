@@ -1,0 +1,74 @@
+---
+# Analysis Value Templates for Pre-Deployment
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: cluster-validation-status
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: 'open5gs_pre_validation_status{namespace="k8s-open5gs"}'
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: node-ready-ratio
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: '(sum(kube_node_status_condition{condition="Ready",status="true"}) / count(kube_node_info)) * 100'
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: api-server-latency
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: 'open5gs_pre_validation_api_latency_ms{namespace="k8s-open5gs"}'
+---
+# Analysis Value Templates for Post-Deployment
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: subscriber-count
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: 'open5gs_post_validation_subscriber_count{namespace="k8s-open5gs"}'
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: nf-pod-ready-ratio
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: '(sum(kube_pod_status_ready{namespace="k8s-open5gs",condition="true"}) / count(kube_pod_status_ready{namespace="k8s-open5gs"})) * 100'
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: nrf-registrations
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: 'open5gs_nrf_nf_registered{namespace="k8s-open5gs"}'
+---
+apiVersion: metrics.keptn.sh/v1beta1
+kind: AnalysisValueTemplate
+metadata:
+  name: sbi-interface-health
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: '(sum(open5gs_sbi_interface_status{namespace="k8s-open5gs",status="up"}) / count(open5gs_sbi_interface_status{namespace="k8s-open5gs"})) * 100'

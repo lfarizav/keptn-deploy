@@ -1,0 +1,108 @@
+---
+# Pre-Deployment Analysis Definition
+# Validates cluster readiness before deploying Open5GS
+apiVersion: metrics.keptn.sh/v1beta1
+kind: KeptnAnalysisDefinition
+metadata:
+  name: pre-deployment-analysis
+  namespace: keptn-system
+spec:
+  objectives:
+    - analysisValueTemplateRef:
+        name: cluster-validation-status
+        namespace: keptn-system
+      target:
+        failure:
+          greaterThan:
+            fixedValue: 2  # Fail if status > 2 (warning level)
+      weight: 1
+      keyObjective: true
+    
+    - analysisValueTemplateRef:
+        name: node-ready-ratio
+        namespace: keptn-system
+      target:
+        failure:
+          lessThan:
+            fixedValue: 80  # Fail if < 80% nodes ready
+      weight: 1
+      keyObjective: true
+    
+    - analysisValueTemplateRef:
+        name: api-server-latency
+        namespace: keptn-system
+      target:
+        failure:
+          greaterThan:
+            fixedValue: 1000  # Fail if latency > 1000ms
+        warning:
+          greaterThan:
+            fixedValue: 500   # Warn if latency > 500ms
+      weight: 1
+      keyObjective: false
+  
+  totalScore:
+    passPercentage: 90
+    warningPercentage: 75
+---
+# Post-Deployment Analysis Definition
+# Validates Open5GS deployment success and health
+apiVersion: metrics.keptn.sh/v1beta1
+kind: KeptnAnalysisDefinition
+metadata:
+  name: post-deployment-analysis
+  namespace: keptn-system
+spec:
+  objectives:
+    - analysisValueTemplateRef:
+        name: subscriber-count
+        namespace: keptn-system
+      target:
+        failure:
+          lessThan:
+            fixedValue: 1  # Fail if no subscribers loaded
+      weight: 1
+      keyObjective: true
+    
+    - analysisValueTemplateRef:
+        name: nf-pod-ready-ratio
+        namespace: keptn-system
+      target:
+        failure:
+          lessThan:
+            fixedValue: 90  # Fail if < 90% pods ready
+        warning:
+          lessThan:
+            fixedValue: 95  # Warn if < 95% pods ready
+      weight: 1
+      keyObjective: true
+    
+    - analysisValueTemplateRef:
+        name: nrf-registrations
+        namespace: keptn-system
+      target:
+        failure:
+          lessThan:
+            fixedValue: 10  # Fail if < 10 NFs registered
+        warning:
+          lessThan:
+            fixedValue: 13  # Warn if < 13 NFs (expect 14)
+      weight: 1
+      keyObjective: false
+    
+    - analysisValueTemplateRef:
+        name: sbi-interface-health
+        namespace: keptn-system
+      target:
+        failure:
+          lessThan:
+            fixedValue: 80  # Fail if < 80% interfaces healthy
+        warning:
+          lessThan:
+            fixedValue: 90  # Warn if < 90% interfaces healthy
+      weight: 1
+      keyObjective: false
+  
+  totalScore:
+    passPercentage: 90
+    warningPercentage: 75
