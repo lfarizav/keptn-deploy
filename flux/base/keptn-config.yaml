@@ -8,3 +8,4 @@ spec:
   OTelCollectorUrl: 'jaeger-collector.jaeger.svc.cluster.local:4317'
   keptnAppCreationRequestTimeoutSeconds: 30
   observabilityTimeout: 5m
+  blockDeployment: true  # Enforce pre-deployment tasks and evaluations
