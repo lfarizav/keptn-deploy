@@ -1,0 +1,131 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-mongodb
+  namespace: keptn-system
+spec:
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait-mongodb
+    image: busybox:1.36
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for MongoDB to be ready..."
+        MAX_RETRIES=60
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if nslookup k8s-mongodb.k8s-open5gs.svc.cluster.local > /dev/null 2>&1; then
+            echo "MongoDB DNS resolved successfully"
+            exit 0
+          fi
+          echo "Waiting for MongoDB... ($RETRY_COUNT/$MAX_RETRIES)"
+          sleep 5
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+        done
+        
+        echo "MongoDB not ready after $MAX_RETRIES attempts"
+        exit 1
+
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-nrf
+  namespace: keptn-system
+spec:
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait-nrf
+    image: busybox:1.36
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for NRF to be ready..."
+        MAX_RETRIES=60
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if nslookup k8s-nrf.k8s-open5gs.svc.cluster.local > /dev/null 2>&1; then
+            echo "NRF DNS resolved successfully"
+            exit 0
+          fi
+          echo "Waiting for NRF... ($RETRY_COUNT/$MAX_RETRIES)"
+          sleep 5
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+        done
+        
+        echo "NRF not ready after $MAX_RETRIES attempts"
+        exit 1
+
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-smf
+  namespace: keptn-system
+spec:
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait-smf
+    image: busybox:1.36
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for SMF to be ready..."
+        MAX_RETRIES=60
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if nslookup k8s-smf.k8s-open5gs.svc.cluster.local > /dev/null 2>&1; then
+            echo "SMF DNS resolved successfully"
+            exit 0
+          fi
+          echo "Waiting for SMF... ($RETRY_COUNT/$MAX_RETRIES)"
+          sleep 5
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+        done
+        
+        echo "SMF not ready after $MAX_RETRIES attempts"
+        exit 1
+
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-amf
+  namespace: keptn-system
+spec:
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait-amf
+    image: busybox:1.36
+    command:
+      - /bin/sh
+      - -c
+      - |
+        echo "Waiting for AMF to be ready..."
+        MAX_RETRIES=60
+        RETRY_COUNT=0
+        
+        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+          if nslookup k8s-amf.k8s-open5gs.svc.cluster.local > /dev/null 2>&1; then
+            echo "AMF DNS resolved successfully"
+            exit 0
+          fi
+          echo "Waiting for AMF... ($RETRY_COUNT/$MAX_RETRIES)"
+          sleep 5
+          RETRY_COUNT=$((RETRY_COUNT + 1))
+        done
+        
+        echo "AMF not ready after $MAX_RETRIES attempts"
+        exit 1
