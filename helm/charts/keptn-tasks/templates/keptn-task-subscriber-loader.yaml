@@ -23,22 +23,21 @@ spec:
         echo "=========================================="
         echo ""
         
-        JOB_NAME="k8s-load-subscribers"
         NAMESPACE="k8s-open5gs"
         MAX_WAIT=300  # 5 minutes
         
         echo "Waiting for subscriber loader Job to complete..."
-        echo "Job: $JOB_NAME"
+        echo "Looking for Job with label: app=load-subscribers"
         echo "Namespace: $NAMESPACE"
         echo ""
         
-        # Wait for Job to exist
+        # Wait for Job to exist (find by label since name includes hash)
         echo "Checking if Job exists..."
         attempt=0
-        until kubectl get job -n $NAMESPACE $JOB_NAME &>/dev/null; do
+        until JOB_NAME=$(kubectl get jobs -n $NAMESPACE -l app=load-subscribers -o jsonpath='{.items[0].metadata.name}' 2>/dev/null) && [ -n "$JOB_NAME" ]; do
           attempt=$((attempt + 1))
           if [ $attempt -gt 30 ]; then
-            echo "✗ Job $JOB_NAME not found after 30 attempts"
+            echo "✗ Job with label app=load-subscribers not found after 30 attempts"
             echo "Available jobs:"
             kubectl get jobs -n $NAMESPACE
             exit 1
@@ -46,7 +45,7 @@ spec:
           echo "  Attempt $attempt - Job not found yet, retrying in 2s..."
           sleep 2
         done
-        echo "✓ Job found"
+        echo "✓ Job found: $JOB_NAME"
         echo ""
         
         # Wait for Job to complete
