@@ -3,6 +3,7 @@ kind: Kustomization
 resources:
 - keptn-alert.yaml
 - keptn-helmrelease.yaml
+- keptn-tasks-helmrelease.yaml
 - keptn-gitrepository.yaml
 # KeptnConfig will be added after Keptn is deployed
 # - keptn-config.yaml
