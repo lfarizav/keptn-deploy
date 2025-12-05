@@ -1,13 +1,16 @@
 ---
+# This Keptn task waits for the subscriber-loader Job to complete
+# The actual loading is done by a regular Job in k8s-open5gs chart
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
   name: subscriber-loader
   namespace: keptn-system
 spec:
+  serviceAccountName: subscriber-loader
   container:
     name: subscriber-loader
-    image: bitnami/mongodb:7.0
+    image: bitnami/kubectl:1.28
     command:
       - /bin/bash
       - -c
@@ -20,41 +23,73 @@ spec:
         echo "=========================================="
         echo ""
         
-        MONGO_HOST="k8s-mongodb.k8s-open5gs.svc.cluster.local"
-        MONGO_PORT="27017"
-        MONGO_DB="open5gs"
+        JOB_NAME="k8s-load-subscribers"
+        NAMESPACE="k8s-open5gs"
+        MAX_WAIT=300  # 5 minutes
         
-        echo "MongoDB: $MONGO_HOST:$MONGO_PORT/$MONGO_DB"
+        echo "Waiting for subscriber loader Job to complete..."
+        echo "Job: $JOB_NAME"
+        echo "Namespace: $NAMESPACE"
         echo ""
         
-        # Wait for MongoDB to be ready
-        echo "Waiting for MongoDB to be ready..."
-        MAX_RETRIES=30
-        RETRY_COUNT=0
-        
-        while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-          if timeout 2 bash -c "echo > /dev/tcp/${MONGO_HOST}/${MONGO_PORT}" 2>/dev/null; then
-            echo "✓ MongoDB is ready!"
-            break
+        # Wait for Job to exist
+        echo "Checking if Job exists..."
+        attempt=0
+        until kubectl get job -n $NAMESPACE $JOB_NAME &>/dev/null; do
+          attempt=$((attempt + 1))
+          if [ $attempt -gt 30 ]; then
+            echo "✗ Job $JOB_NAME not found after 30 attempts"
+            echo "Available jobs:"
+            kubectl get jobs -n $NAMESPACE
+            exit 1
           fi
-          RETRY_COUNT=$((RETRY_COUNT + 1))
-          echo "  MongoDB not ready, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+          echo "  Attempt $attempt - Job not found yet, retrying in 2s..."
           sleep 2
         done
+        echo "✓ Job found"
+        echo ""
         
-        if [ $RETRY_COUNT -eq $MAX_RETRIES ]; then
-          echo "✗ MongoDB failed to become ready after $MAX_RETRIES attempts"
+        # Wait for Job to complete
+        echo "Waiting for Job to complete (max ${MAX_WAIT}s)..."
+        if kubectl wait --for=condition=complete --timeout=${MAX_WAIT}s job/$JOB_NAME -n $NAMESPACE; then
+          echo "✓ Subscriber loader Job completed successfully"
+          
+          # Verify subscribers were loaded
+          echo ""
+          echo "Checking MongoDB for loaded subscribers..."
+          
+          # Get MongoDB pod
+          MONGO_POD=$(kubectl get pod -n $NAMESPACE -l app=mongodb -o jsonpath='{.items[0].metadata.name}')
+          
+          if [ -n "$MONGO_POD" ]; then
+            echo "MongoDB pod: $MONGO_POD"
+            
+            # Check subscriber count
+            SUBSCRIBER_COUNT=$(kubectl exec -n $NAMESPACE $MONGO_POD -- mongosh open5gs --quiet --eval "db.subscribers.countDocuments({})" 2>/dev/null || echo "0")
+            echo "Subscribers in database: $SUBSCRIBER_COUNT"
+            
+            if [ "$SUBSCRIBER_COUNT" -gt 0 ]; then
+              echo "✓ Subscribers loaded successfully"
+            else
+              echo "⚠ Warning: No subscribers found in database"
+            fi
+          else
+            echo "⚠ Warning: Could not find MongoDB pod to verify"
+          fi
+          
+          echo ""
+          echo "✓ Subscriber loader task COMPLETE"
+          exit 0
+        else
+          echo "✗ Job did not complete within ${MAX_WAIT}s"
+          echo ""
+          echo "Job status:"
+          kubectl get job -n $NAMESPACE $JOB_NAME -o yaml
+          echo ""
+          echo "Job pods:"
+          kubectl get pods -n $NAMESPACE -l app=load-subscribers
+          echo ""
+          echo "Recent logs:"
+          kubectl logs -n $NAMESPACE -l app=load-subscribers --tail=50
           exit 1
         fi
-        
-        # Load subscribers from ConfigMap
-        # Note: The actual subscriber data will be loaded from the ConfigMap
-        # which is managed separately. This task ensures MongoDB is ready
-        # and creates the database structure if needed.
-        
-        echo ""
-        echo "Subscriber loading is handled by application init scripts"
-        echo "This task validates MongoDB connectivity"
-        echo ""
-        echo "✓ Subscriber loader validation PASSED"
-        exit 0
