@@ -7,7 +7,6 @@ metadata:
   name: subscriber-loader
   namespace: keptn-system
 spec:
-  serviceAccountName: subscriber-loader
   container:
     name: subscriber-loader
     image: bitnami/kubectl:latest
