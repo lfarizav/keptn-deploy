@@ -1,0 +1,10 @@
+apiVersion: v2
+name: keptn-tasks
+description: Keptn task definitions, evaluations, and metrics for Open5GS
+type: application
+version: 0.1.0
+appVersion: "1.0"
+dependencies:
+  - name: keptn
+    version: "0.12.0"
+    repository: "file://../keptn"
