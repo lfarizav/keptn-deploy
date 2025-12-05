@@ -7,6 +7,8 @@ metadata:
 spec:
   retries: 3
   timeout: 10m
+  imagePullSecrets:
+    - name: dockerhub-creds
   container:
     name: wait-mongodb
     image: busybox:1.36
@@ -40,6 +42,8 @@ metadata:
 spec:
   retries: 3
   timeout: 10m
+  imagePullSecrets:
+    - name: dockerhub-creds
   container:
     name: wait-nrf
     image: busybox:1.36
@@ -73,6 +77,8 @@ metadata:
 spec:
   retries: 3
   timeout: 10m
+  imagePullSecrets:
+    - name: dockerhub-creds
   container:
     name: wait-smf
     image: busybox:1.36
@@ -106,6 +112,8 @@ metadata:
 spec:
   retries: 3
   timeout: 10m
+  imagePullSecrets:
+    - name: dockerhub-creds
   container:
     name: wait-amf
     image: busybox:1.36

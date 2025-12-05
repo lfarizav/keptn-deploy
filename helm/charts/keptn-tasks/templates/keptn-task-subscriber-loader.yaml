@@ -9,6 +9,8 @@ metadata:
 spec:
   retries: 3
   timeout: 10m
+  imagePullSecrets:
+    - name: dockerhub-creds
   serviceAccountName: subscriber-loader
   container:
     name: subscriber-loader
