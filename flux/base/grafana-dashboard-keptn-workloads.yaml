@@ -225,8 +225,8 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "max(keptn_deployment_deploymentduration) by (keptn_deployment_workload_name, keptn_deployment_workload_version)",
-            "legendFormat": "{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
+            "expr": "max(keptn_deployment_deploymentduration) by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version)",
+            "legendFormat": "{{keptn_deployment_app_name}}/{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
             "refId": "A"
           }],
           "title": "Workload Deployment Duration",
@@ -399,7 +399,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "max(keptn_deployment_active) by (keptn_deployment_workload_name, keptn_deployment_workload_version)",
+            "expr": "max(keptn_deployment_active) by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version)",
             "format": "table",
             "instant": true,
             "refId": "A"
@@ -414,7 +414,6 @@ data:
                   "__name__": true,
                   "instance": true,
                   "job": true,
-                  "keptn_deployment_app_name": true,
                   "keptn_deployment_app_namespace": true,
                   "namespace": true,
                   "pod": true,
@@ -423,7 +422,12 @@ data:
                   "container": true
                 },
                 "indexByName": {},
-                "renameByName": {}
+                "renameByName": {
+                  "keptn_deployment_app_name": "App",
+                  "keptn_deployment_workload_name": "Workload",
+                  "keptn_deployment_workload_version": "Version",
+                  "Value": "Status"
+                }
               }
             }
           ],
