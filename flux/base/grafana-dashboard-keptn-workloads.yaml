@@ -225,7 +225,7 @@ data:
           },
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "max(keptn_deployment_deploymentduration) by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version)",
+            "expr": "max by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version) (max_over_time(keptn_deployment_deploymentduration[5m]))",
             "legendFormat": "{{keptn_deployment_app_name}}/{{keptn_deployment_workload_name}} v{{keptn_deployment_workload_version}}",
             "refId": "A"
           }],
@@ -399,7 +399,7 @@ data:
           "pluginVersion": "9.5.3",
           "targets": [{
             "datasource": {"type": "prometheus", "uid": "prometheus"},
-            "expr": "max(keptn_deployment_active) by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version)",
+            "expr": "max by (keptn_deployment_app_name, keptn_deployment_workload_name, keptn_deployment_workload_version) (keptn_deployment_active)",
             "format": "table",
             "instant": true,
             "refId": "A"
