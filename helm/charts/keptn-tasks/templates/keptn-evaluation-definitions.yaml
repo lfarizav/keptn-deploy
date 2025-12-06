@@ -3,7 +3,7 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnEvaluationDefinition
 metadata:
-  name: cluster-resources-check
+  name: initial-deployment-validation
   namespace: keptn-system
 spec:
   objectives:
@@ -43,7 +43,7 @@ spec:
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnEvaluationDefinition
 metadata:
-  name: application-health-check
+  name: final-deployment-validation
   namespace: keptn-system
 spec:
   objectives:
