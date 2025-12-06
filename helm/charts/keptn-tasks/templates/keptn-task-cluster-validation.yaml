@@ -2,11 +2,11 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
-  name: cluster-validation
+  name: pre-deployment-order
   namespace: keptn-system
 spec:
   container:
-    name: cluster-validator
+    name: pre-deployment-order
     image: bitnami/kubectl:latest
     command:
       - /bin/bash
@@ -16,7 +16,7 @@ spec:
         set -e
         
         echo "=========================================="
-        echo "Keptn Pre-Deployment: Cluster Validation"
+        echo "Keptn: Pre-Deployment Ordering"
         echo "=========================================="
         echo ""
         
