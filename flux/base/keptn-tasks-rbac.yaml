@@ -1,0 +1,151 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pre-deployment-validation
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: pre-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: post-deployment-validation
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: wait-for-pod
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: pre-deployment-validation
+  labels:
+    app.kubernetes.io/name: pre-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+rules:
+  - apiGroups: [""]
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups: [""]
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+  - apiGroups: [""]
+    resources:
+      - namespaces
+      - resourcequotas
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: post-deployment-validation
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: pre-deployment-validation
+  labels:
+    app.kubernetes.io/name: pre-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pre-deployment-validation
+subjects:
+  - kind: ServiceAccount
+    name: pre-deployment-validation
+    namespace: keptn-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: post-deployment-validation
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: post-deployment-validation
+subjects:
+  - kind: ServiceAccount
+    name: post-deployment-validation
+    namespace: keptn-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: wait-for-pod
+  namespace: k8s-open5gs
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+rules:
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - statefulsets
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: wait-for-pod
+  namespace: k8s-open5gs
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: wait-for-pod
+subjects:
+  - kind: ServiceAccount
+    name: wait-for-pod
+    namespace: keptn-system

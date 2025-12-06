@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: wait-for-pod
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: wait-for-pod
+  namespace: k8s-open5gs
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+rules:
+  # Read pods, deployments, and statefulsets to check readiness
+  - apiGroups: [""]
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups: ["apps"]
+    resources:
+      - deployments
+      - statefulsets
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: wait-for-pod
+  namespace: k8s-open5gs
+  labels:
+    app.kubernetes.io/name: wait-for-pod
+    app.kubernetes.io/part-of: keptn-tasks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: wait-for-pod
+subjects:
+  - kind: ServiceAccount
+    name: wait-for-pod
+    namespace: keptn-system

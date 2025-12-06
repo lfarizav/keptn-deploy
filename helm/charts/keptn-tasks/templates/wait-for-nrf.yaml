@@ -1,0 +1,21 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-nrf
+  namespace: keptn-system
+spec:
+  serviceAccount:
+    name: wait-for-pod
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Waiting for NRF to be ready..."
+        kubectl wait --for=condition=ready pod -l app=open5gs,nf=nrf -n k8s-open5gs --timeout=300s
+        echo "✓ NRF is ready"

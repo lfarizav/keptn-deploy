@@ -1,0 +1,21 @@
+---
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: wait-for-mongodb
+  namespace: keptn-system
+spec:
+  serviceAccount:
+    name: wait-for-pod
+  retries: 3
+  timeout: 5m
+  container:
+    name: wait
+    image: bitnami/kubectl:latest
+    command:
+      - /bin/bash
+      - -c
+      - |
+        echo "Waiting for MongoDB to be ready..."
+        kubectl wait --for=condition=ready pod -l app=mongodb -n k8s-open5gs --timeout=300s
+        echo "✓ MongoDB is ready"
