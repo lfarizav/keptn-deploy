@@ -7,7 +7,7 @@ metadata:
 spec:
   container:
     name: dependency-checker
-    image: bitnami/kubectl:latest
+    image: alpine/k8s:1.28.13
     command:
       - /bin/bash
       - -c
@@ -16,7 +16,7 @@ spec:
         set -e
         
         echo "=========================================="
-        echo "Keptn Pre-Deployment: Dependency Check"
+        echo "Keptn Pre-Deployment Validation Report"
         echo "=========================================="
         echo ""
         
@@ -33,51 +33,121 @@ spec:
           fi
         }
         
+        print_info() {
+          echo "ℹ INFO: $1"
+        }
+        
+        echo "=== CLUSTER RESOURCE ASSESSMENT ==="
+        echo ""
+        
+        # Get cluster nodes information
+        echo "📊 Cluster Nodes:"
+        kubectl get nodes -o custom-columns=NAME:.metadata.name,STATUS:.status.conditions[-1].type,ROLES:.metadata.labels.node-role\.kubernetes\.io/control-plane,CPU:.status.capacity.cpu,MEMORY:.status.capacity.memory,ARCH:.status.nodeInfo.architecture --no-headers | while read line; do
+          echo "  $line"
+        done
+        echo ""
+        
+        # Calculate total cluster resources
+        TOTAL_CPU=$(kubectl get nodes -o json | jq '[.items[].status.capacity.cpu | tonumber] | add')
+        TOTAL_MEMORY_KB=$(kubectl get nodes -o json | jq '[.items[].status.capacity.memory | rtrimstr("Ki") | tonumber] | add')
+        TOTAL_MEMORY_GB=$(echo "scale=2; $TOTAL_MEMORY_KB / 1024 / 1024" | bc)
+        NODE_COUNT=$(kubectl get nodes --no-headers | wc -l)
+        
+        print_info "Total Nodes: $NODE_COUNT"
+        print_info "Total CPU Cores: $TOTAL_CPU"
+        print_info "Total Memory: ${TOTAL_MEMORY_GB} GB"
+        echo ""
+        
+        # Check node health
+        echo "🏥 Node Health:"
+        NOT_READY=$(kubectl get nodes --no-headers | grep -v " Ready " | wc -l)
+        print_result $([ $NOT_READY -eq 0 ] && echo 0 || echo 1) "All nodes are Ready ($NODE_COUNT/$NODE_COUNT)"
+        
+        # Check for node pressure conditions
+        MEMORY_PRESSURE=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="MemoryPressure" and .status=="True")) | .metadata.name' | wc -l)
+        print_result $([ $MEMORY_PRESSURE -eq 0 ] && echo 0 || echo 1) "No nodes with memory pressure"
+        
+        DISK_PRESSURE=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="DiskPressure" and .status=="True")) | .metadata.name' | wc -l)
+        print_result $([ $DISK_PRESSURE -eq 0 ] && echo 0 || echo 1) "No nodes with disk pressure"
+        
+        PID_PRESSURE=$(kubectl get nodes -o json | jq -r '.items[] | select(.status.conditions[] | select(.type=="PIDPressure" and .status=="True")) | .metadata.name' | wc -l)
+        print_result $([ $PID_PRESSURE -eq 0 ] && echo 0 || echo 1) "No nodes with PID pressure"
+        echo ""
+        
+        # Resource availability for namespace
+        echo "📦 Namespace Resource Usage ($NAMESPACE):"
+        
+        # Get current resource requests in namespace
+        CURRENT_CPU_REQ=$(kubectl get pods -n $NAMESPACE -o json 2>/dev/null | jq -r '[.items[].spec.containers[].resources.requests.cpu // "0" | rtrimstr("m") | tonumber] | add // 0')
+        CURRENT_MEM_REQ_MB=$(kubectl get pods -n $NAMESPACE -o json 2>/dev/null | jq -r '[.items[].spec.containers[].resources.requests.memory // "0Mi" | rtrimstr("Mi") | rtrimstr("Gi") | tonumber] | add // 0')
+        
+        print_info "Current CPU requested: ${CURRENT_CPU_REQ}m"
+        print_info "Current Memory requested: ${CURRENT_MEM_REQ_MB}Mi"
+        
+        # Check if namespace has resource quotas
+        QUOTA_EXISTS=$(kubectl get resourcequota -n $NAMESPACE --no-headers 2>/dev/null | wc -l)
+        if [ $QUOTA_EXISTS -gt 0 ]; then
+          echo "  Resource Quotas:"
+          kubectl get resourcequota -n $NAMESPACE -o custom-columns=NAME:.metadata.name,CPU-USED:.status.used.cpu,CPU-HARD:.status.hard.cpu,MEM-USED:.status.used.memory,MEM-HARD:.status.hard.memory --no-headers 2>/dev/null || echo "  No quota details available"
+        else
+          print_info "No resource quotas defined for namespace"
+        fi
+        echo ""
+        
+        # Minimum resource requirements check
+        echo "⚙️  Minimum Requirements Check:"
+        MIN_CPU=2
+        MIN_MEM_GB=4
+        
+        print_result $([ $(echo "$TOTAL_CPU >= $MIN_CPU" | bc) -eq 1 ] && echo 0 || echo 1) "Cluster has minimum $MIN_CPU CPU cores (available: $TOTAL_CPU)"
+        print_result $([ $(echo "$TOTAL_MEMORY_GB >= $MIN_MEM_GB" | bc) -eq 1 ] && echo 0 || echo 1) "Cluster has minimum ${MIN_MEM_GB}GB memory (available: ${TOTAL_MEMORY_GB}GB)"
+        echo ""
+        
         # Check if this is initial deployment or upgrade
         EXISTING_PODS=$(kubectl get pods -n $NAMESPACE 2>/dev/null | grep -v "NAME" | wc -l || echo 0)
         
         if [ $EXISTING_PODS -eq 0 ]; then
-          echo "Initial deployment detected - no dependency checks needed"
-          echo "Core network components will start in natural order"
-          exit 0
+          echo "=== INITIAL DEPLOYMENT ==="
+          print_info "First deployment detected - skipping dependency checks"
+          print_info "Core network components will start in natural order"
+          echo ""
+        else
+          echo "=== DEPENDENCY VALIDATION (Upgrade/Redeploy) ==="
+          echo ""
+          
+          # Check MongoDB is ready (required by NRF, UDM, UDR, PCF, etc.)
+          echo "🗄️  Database Layer:"
+          MONGO_READY=$(kubectl get pods -n $NAMESPACE -l app=mongodb -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
+          print_result $([ "$MONGO_READY" == "True" ] && echo 0 || echo 1) "MongoDB is ready and available"
+          echo ""
+          
+          # Check NRF is ready (required by all NFs for service discovery)
+          echo "🔍 Service Discovery:"
+          NRF_READY=$(kubectl get pods -n $NAMESPACE -l app=nrf -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
+          print_result $([ "$NRF_READY" == "True" ] && echo 0 || echo 1) "NRF (Network Repository Function) is ready"
+          echo ""
+          
+          # Verify DNS resolution for critical services
+          echo "🌐 DNS Resolution:"
+          for service in nrf smf amf; do
+            FQDN="${RELEASE}-${service}.${NAMESPACE}.svc.cluster.local"
+            if nslookup $FQDN 2>/dev/null | grep -q "Address:"; then
+              echo "  ✓ DNS resolves: $FQDN"
+            else
+              echo "  ✗ DNS failed: $FQDN"
+              VALIDATION_FAILED=1
+            fi
+          done
+          echo ""
         fi
         
-        echo "=== Checking Core Network Dependencies ==="
-        echo ""
-        
-        # For upgrades, verify core components are healthy before proceeding
-        
-        # Check MongoDB is ready (required by NRF, UDM, UDR, PCF, etc.)
-        echo "Checking MongoDB..."
-        MONGO_READY=$(kubectl get pods -n $NAMESPACE -l app=mongodb -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
-        print_result $([ "$MONGO_READY" == "True" ] && echo 0 || echo 1) "MongoDB is ready"
-        
-        # Check NRF is ready (required by all NFs for service discovery)
-        echo "Checking NRF..."
-        NRF_READY=$(kubectl get pods -n $NAMESPACE -l app=nrf -o jsonpath='{.items[0].status.conditions[?(@.type=="Ready")].status}' 2>/dev/null || echo "False")
-        print_result $([ "$NRF_READY" == "True" ] && echo 0 || echo 1) "NRF is ready"
-        
-        # Verify DNS resolution for critical services
-        echo ""
-        echo "=== DNS Resolution Checks ==="
-        echo ""
-        
-        for service in nrf smf amf; do
-          FQDN="${RELEASE}-${service}.${NAMESPACE}.svc.cluster.local"
-          if nslookup $FQDN 2>/dev/null | grep -q "Address:"; then
-            echo "✓ DNS resolves: $FQDN"
-          else
-            echo "✗ DNS failed: $FQDN"
-            VALIDATION_FAILED=1
-          fi
-        done
-        
-        echo ""
         echo "=========================================="
         if [ $VALIDATION_FAILED -eq 0 ]; then
-          echo "✓ All dependency checks PASSED"
+          echo "✅ PRE-DEPLOYMENT VALIDATION PASSED"
+          echo "Cluster resources and dependencies validated"
           exit 0
         else
-          echo "✗ Some dependency checks FAILED"
+          echo "❌ PRE-DEPLOYMENT VALIDATION FAILED"
+          echo "Review errors above before proceeding"
           exit 1
         fi
