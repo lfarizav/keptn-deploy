@@ -9,6 +9,7 @@ spec:
   chart:
     spec:
       chart: ./helm/charts/keptn-tasks
+      reconcileStrategy: Revision
       sourceRef:
         kind: GitRepository
         name: keptn-deploy
