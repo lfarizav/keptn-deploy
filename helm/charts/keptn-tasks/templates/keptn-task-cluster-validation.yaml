@@ -2,11 +2,11 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
-  name: pre-deployment-order
+  name: deployment-order
   namespace: keptn-system
 spec:
   container:
-    name: pre-deployment-order
+    name: deployment-order
     image: bitnami/kubectl:latest
     command:
       - /bin/bash
