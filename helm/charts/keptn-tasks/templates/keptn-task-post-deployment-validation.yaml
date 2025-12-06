@@ -2,7 +2,7 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
-  name: core-network-connectivity
+  name: post-deployment-validation
   namespace: keptn-system
 spec:
   container:

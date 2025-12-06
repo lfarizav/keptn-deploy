@@ -2,7 +2,7 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
-  name: dependency-check
+  name: pre-deployment-validation
   namespace: keptn-system
 spec:
   container:
