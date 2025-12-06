@@ -1,6 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+- flux-rbac-cluster.yaml
 - keptn-alert.yaml
 - keptn-helmrelease.yaml
 - keptn-tasks-helmrelease.yaml
