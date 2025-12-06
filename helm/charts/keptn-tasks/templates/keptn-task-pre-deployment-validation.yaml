@@ -5,6 +5,8 @@ metadata:
   name: pre-deployment-validation
   namespace: keptn-system
 spec:
+  serviceAccount:
+    name: pre-deployment-validation
   container:
     name: dependency-checker
     image: alpine/k8s:1.28.13

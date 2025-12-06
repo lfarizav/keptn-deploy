@@ -5,6 +5,8 @@ metadata:
   name: post-deployment-validation
   namespace: keptn-system
 spec:
+  serviceAccount:
+    name: post-deployment-validation
   container:
     name: connectivity-checker
     image: bitnami/kubectl:latest

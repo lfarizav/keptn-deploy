@@ -1,0 +1,49 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: post-deployment-validation
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: post-deployment-validation
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+rules:
+  # Read pods and services for health checks
+  - apiGroups: [""]
+    resources:
+      - pods
+      - services
+    verbs:
+      - get
+      - list
+  # Read namespaces
+  - apiGroups: [""]
+    resources:
+      - namespaces
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: post-deployment-validation
+  labels:
+    app.kubernetes.io/name: post-deployment-validation
+    app.kubernetes.io/part-of: keptn-tasks
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: post-deployment-validation
+subjects:
+  - kind: ServiceAccount
+    name: post-deployment-validation
+    namespace: keptn-system
