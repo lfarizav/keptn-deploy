@@ -2,7 +2,7 @@
 apiVersion: lifecycle.keptn.sh/v1
 kind: KeptnTaskDefinition
 metadata:
-  name: deployment-validation
+  name: final-deployment-validation
   namespace: keptn-system
 spec:
   serviceAccount:
