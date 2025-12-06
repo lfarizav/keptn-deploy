@@ -62,3 +62,43 @@ spec:
     name: prometheus
   query: "kube_pod_status_ready{namespace='k8s-open5gs',pod=~'.*nrf.*',condition='true'}"
   fetchIntervalSeconds: 10
+
+---
+# Post-deployment metrics
+# KeptnMetric for running pods count
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: open5gs-pods-running
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "count(kube_pod_status_phase{namespace='k8s-open5gs',phase='Running'})"
+  fetchIntervalSeconds: 10
+
+---
+# KeptnMetric for failed pods count
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: open5gs-pods-failed
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "count(kube_pod_status_phase{namespace='k8s-open5gs',phase='Failed'}) or vector(0)"
+  fetchIntervalSeconds: 10
+
+---
+# KeptnMetric for core network functions ready
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: core-nfs-ready
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "count(kube_pod_status_ready{namespace='k8s-open5gs',pod=~'.*(nrf|smf|amf|upf).*',condition='true'})"
+  fetchIntervalSeconds: 10

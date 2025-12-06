@@ -37,3 +37,25 @@ spec:
         name: nrf-ready
         namespace: keptn-system
       evaluationTarget: ">=1"
+
+---
+# Post-deployment evaluation: Application Health
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnEvaluationDefinition
+metadata:
+  name: application-health-check
+  namespace: keptn-system
+spec:
+  objectives:
+    - keptnMetricRef:
+        name: open5gs-pods-running
+        namespace: keptn-system
+      evaluationTarget: ">=10"
+    - keptnMetricRef:
+        name: open5gs-pods-failed
+        namespace: keptn-system
+      evaluationTarget: "==0"
+    - keptnMetricRef:
+        name: core-nfs-ready
+        namespace: keptn-system
+      evaluationTarget: ">=4"
