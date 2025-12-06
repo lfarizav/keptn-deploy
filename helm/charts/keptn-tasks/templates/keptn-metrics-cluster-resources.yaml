@@ -1,0 +1,64 @@
+---
+# KeptnMetric for available CPU cores
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: cluster-available-cpus
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "sum(kube_node_status_capacity{resource='cpu'})"
+  fetchIntervalSeconds: 60
+
+---
+# KeptnMetric for available memory in GB
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: cluster-available-memory-gb
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "sum(kube_node_status_capacity{resource='memory'}) / 1024 / 1024 / 1024"
+  fetchIntervalSeconds: 60
+
+---
+# KeptnMetric for ready nodes count
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: cluster-ready-nodes
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "count(kube_node_status_condition{condition='Ready',status='true'})"
+  fetchIntervalSeconds: 30
+
+---
+# KeptnMetric for MongoDB readiness
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: mongodb-ready
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "kube_pod_status_ready{namespace='k8s-open5gs',pod=~'.*mongodb.*',condition='true'}"
+  fetchIntervalSeconds: 10
+
+---
+# KeptnMetric for NRF readiness
+apiVersion: metrics.keptn.sh/v1
+kind: KeptnMetric
+metadata:
+  name: nrf-ready
+  namespace: keptn-system
+spec:
+  provider:
+    name: prometheus
+  query: "kube_pod_status_ready{namespace='k8s-open5gs',pod=~'.*nrf.*',condition='true'}"
+  fetchIntervalSeconds: 10

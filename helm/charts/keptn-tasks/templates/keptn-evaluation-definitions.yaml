@@ -1,0 +1,39 @@
+---
+# Pre-deployment evaluation: Cluster Resources
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnEvaluationDefinition
+metadata:
+  name: cluster-resources-check
+  namespace: keptn-system
+spec:
+  objectives:
+    - keptnMetricRef:
+        name: cluster-available-cpus
+        namespace: keptn-system
+      evaluationTarget: ">=2"
+    - keptnMetricRef:
+        name: cluster-available-memory-gb
+        namespace: keptn-system
+      evaluationTarget: ">=4"
+    - keptnMetricRef:
+        name: cluster-ready-nodes
+        namespace: keptn-system
+      evaluationTarget: ">=1"
+
+---
+# Pre-deployment evaluation: Core Dependencies (for upgrades)
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnEvaluationDefinition
+metadata:
+  name: core-dependencies-check
+  namespace: keptn-system
+spec:
+  objectives:
+    - keptnMetricRef:
+        name: mongodb-ready
+        namespace: keptn-system
+      evaluationTarget: ">=1"
+    - keptnMetricRef:
+        name: nrf-ready
+        namespace: keptn-system
+      evaluationTarget: ">=1"
