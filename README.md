@@ -856,4 +856,4 @@ See LICENSE file for details.
 
 ---
 
-**Made it with ❤️ by Cuemby/Beanters using GitOps**
+**Made it with ❤️ by Beanters using GitOps**
