@@ -8,9 +8,8 @@ data:
   values.yaml: |
     lifecycleOperator:
       enabled: true
-      env:
-        otelCollectorUrl: jaeger-collector.jaeger.svc.cluster.local:4317
-      
+      # otelCollectorUrl removed - Jaeger not required for POC per V2.1 spec
+
     metricsOperator:
       enabled: true
       env:

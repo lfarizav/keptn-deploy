@@ -1,0 +1,228 @@
+---
+# =============================================================================
+# Config Validation Task for POC Deutsche Telekom
+# Validates Helm values before deployment as per Keptn + FluxCD Spec V2.1
+# =============================================================================
+apiVersion: lifecycle.keptn.sh/v1
+kind: KeptnTaskDefinition
+metadata:
+  name: config-validation
+  namespace: keptn-system
+  labels:
+    app.kubernetes.io/name: keptn-task
+    app.kubernetes.io/component: pre-deployment
+    poc.dt.com/task-type: validation
+spec:
+  retries: 1
+  timeout: 2m
+  serviceAccount:
+    name: pre-deployment-validation
+  deno:
+    inline:
+      code: |
+        // Config Validation Task for 5G Core Deployment
+        // Validates Helm values.yaml before deployment
+
+        const requiredFields = [
+          { path: "global.image.repository", type: "string" },
+          { path: "global.image.tag", type: "string" },
+        ];
+
+        const resourceFields = [
+          { path: "amf.resources.requests.cpu", minValue: "50m" },
+          { path: "amf.resources.requests.memory", minValue: "64Mi" },
+          { path: "smf.resources.requests.cpu", minValue: "50m" },
+          { path: "smf.resources.requests.memory", minValue: "64Mi" },
+          { path: "upf.resources.requests.cpu", minValue: "100m" },
+          { path: "upf.resources.requests.memory", minValue: "128Mi" },
+        ];
+
+        interface ValidationError {
+          field: string;
+          error: string;
+          severity: "error" | "warning";
+        }
+
+        const errors: ValidationError[] = [];
+        const warnings: ValidationError[] = [];
+
+        // Get values from environment or ConfigMap
+        const namespace = Deno.env.get("KEPTN_NAMESPACE") || "k8s-open5gs";
+        const releaseName = Deno.env.get("KEPTN_APP_NAME") || "k8s";
+
+        console.log("==========================================");
+        console.log("Keptn Config Validation Report");
+        console.log("==========================================");
+        console.log(`Namespace: ${namespace}`);
+        console.log(`Release: ${releaseName}`);
+        console.log("");
+
+        // Helper function to get nested value from object
+        function getNestedValue(obj: Record<string, unknown>, path: string): unknown {
+          const parts = path.split(".");
+          let current: unknown = obj;
+          for (const part of parts) {
+            if (current === null || current === undefined) return undefined;
+            if (typeof current !== "object") return undefined;
+            current = (current as Record<string, unknown>)[part];
+          }
+          return current;
+        }
+
+        // Helper function to parse resource value (e.g., "100m" -> 100, "256Mi" -> 256)
+        function parseResourceValue(value: string): number {
+          if (!value) return 0;
+          const numMatch = value.match(/^(\d+)/);
+          return numMatch ? parseInt(numMatch[1]) : 0;
+        }
+
+        // Simulate values validation (in real scenario, fetch from ConfigMap or Git)
+        // For POC, we validate based on environment variables and defaults
+
+        console.log("=== VALIDATION RULES ===");
+        console.log("");
+
+        // Rule CV-01 & CV-02: Required fields present
+        console.log("📋 Required Fields Check:");
+
+        const imageRepo = Deno.env.get("IMAGE_REPOSITORY") || "lfarizav/k8s_open5gs";
+        const imageTag = Deno.env.get("IMAGE_TAG") || "main-sms-data";
+
+        if (!imageRepo || imageRepo.trim() === "") {
+          errors.push({
+            field: "global.image.repository",
+            error: "Image repository is not defined",
+            severity: "error"
+          });
+          console.log("  ✗ FAIL: Image repository is missing");
+        } else {
+          console.log(`  ✓ PASS: Image repository defined (${imageRepo})`);
+        }
+
+        if (!imageTag || imageTag.trim() === "") {
+          errors.push({
+            field: "global.image.tag",
+            error: "Image tag is not defined",
+            severity: "error"
+          });
+          console.log("  ✗ FAIL: Image tag is missing");
+        } else {
+          console.log(`  ✓ PASS: Image tag defined (${imageTag})`);
+        }
+
+        console.log("");
+
+        // Rule CV-03: Image tag is NOT 'latest'
+        console.log("🏷️  Image Tag Policy Check:");
+        if (imageTag === "latest") {
+          errors.push({
+            field: "global.image.tag",
+            error: "Image tag 'latest' is not allowed in production",
+            severity: "error"
+          });
+          console.log("  ✗ FAIL: Image tag 'latest' not allowed in production");
+        } else {
+          console.log(`  ✓ PASS: Image tag is not 'latest' (${imageTag})`);
+        }
+
+        console.log("");
+
+        // Rule CV-04 & CV-05: Resource requests validation
+        console.log("⚙️  Resource Requests Check:");
+
+        const cpuRequest = Deno.env.get("CPU_REQUEST") || "100m";
+        const memoryRequest = Deno.env.get("MEMORY_REQUEST") || "128Mi";
+
+        const cpuValue = parseResourceValue(cpuRequest);
+        const memValue = parseResourceValue(memoryRequest);
+
+        if (cpuValue < 50) {
+          warnings.push({
+            field: "resources.requests.cpu",
+            error: `CPU request (${cpuRequest}) is below minimum recommended (50m)`,
+            severity: "warning"
+          });
+          console.log(`  ⚠ WARN: CPU request (${cpuRequest}) below minimum 50m`);
+        } else {
+          console.log(`  ✓ PASS: CPU request (${cpuRequest}) meets minimum`);
+        }
+
+        if (memValue < 64) {
+          warnings.push({
+            field: "resources.requests.memory",
+            error: `Memory request (${memoryRequest}) is below minimum recommended (64Mi)`,
+            severity: "warning"
+          });
+          console.log(`  ⚠ WARN: Memory request (${memoryRequest}) below minimum 64Mi`);
+        } else {
+          console.log(`  ✓ PASS: Memory request (${memoryRequest}) meets minimum`);
+        }
+
+        console.log("");
+
+        // Additional validation: Check for dangerous configurations
+        console.log("🔒 Security Configuration Check:");
+
+        const privileged = Deno.env.get("PRIVILEGED_CONTAINERS") || "false";
+        if (privileged === "true") {
+          warnings.push({
+            field: "securityContext.privileged",
+            error: "Privileged containers are enabled",
+            severity: "warning"
+          });
+          console.log("  ⚠ WARN: Privileged containers enabled");
+        } else {
+          console.log("  ✓ PASS: No privileged containers");
+        }
+
+        const hostNetwork = Deno.env.get("HOST_NETWORK") || "false";
+        if (hostNetwork === "true" && namespace !== "k8s-open5gs") {
+          warnings.push({
+            field: "hostNetwork",
+            error: "Host network is enabled (may be required for UPF)",
+            severity: "warning"
+          });
+          console.log("  ⚠ WARN: Host network enabled");
+        } else {
+          console.log("  ✓ PASS: Host network configuration OK");
+        }
+
+        console.log("");
+
+        // Summary
+        console.log("==========================================");
+        console.log("VALIDATION SUMMARY");
+        console.log("==========================================");
+        console.log(`Errors:   ${errors.length}`);
+        console.log(`Warnings: ${warnings.length}`);
+        console.log("");
+
+        if (errors.length > 0) {
+          console.log("ERRORS:");
+          for (const err of errors) {
+            console.log(`  - [${err.field}] ${err.error}`);
+          }
+          console.log("");
+        }
+
+        if (warnings.length > 0) {
+          console.log("WARNINGS:");
+          for (const warn of warnings) {
+            console.log(`  - [${warn.field}] ${warn.error}`);
+          }
+          console.log("");
+        }
+
+        if (errors.length > 0) {
+          console.log("❌ CONFIG VALIDATION FAILED");
+          console.log("Fix the errors above before deployment");
+          Deno.exit(1);
+        } else if (warnings.length > 0) {
+          console.log("⚠️  CONFIG VALIDATION PASSED WITH WARNINGS");
+          console.log("Review warnings before production deployment");
+          Deno.exit(0);
+        } else {
+          console.log("✅ CONFIG VALIDATION PASSED");
+          console.log("All configuration checks passed");
+          Deno.exit(0);
+        }

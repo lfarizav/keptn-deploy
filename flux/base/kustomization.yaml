@@ -10,10 +10,6 @@ resources:
 # - keptn-config.yaml
 - keptn-observability-configmap.yaml
 - keptn-servicemonitor.yaml
-- grafana-datasources.yaml
-- grafana-dashboard-keptn-overview.yaml
-- grafana-dashboard-keptn-applications.yaml
-- grafana-dashboard-keptn-workloads.yaml
-- slack-provider.yaml
-- slack-notif-alert.yaml
+- dashboards/
+# Slack notifications centralized in k8s-open5gs-fleet/projects/base/shared/
 

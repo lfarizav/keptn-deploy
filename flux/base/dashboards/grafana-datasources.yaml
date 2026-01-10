@@ -20,21 +20,6 @@ stringData:
                 "type": "prometheus",
                 "url": "http://prom-kube-prometheus-stack-prometheus.monitoring.svc:9090",
                 "version": 1
-            },
-            {
-                "orgId":1,
-                "name":"Jaeger",
-                "type":"jaeger",
-                "typeName":"Jaeger",
-                "typeLogoUrl":"public/app/plugins/datasource/jaeger/img/jaeger_logo.svg",
-                "access":"proxy",
-                "url":"http://jaeger-query.jaeger.svc.cluster.local:16686",
-                "user":"",
-                "database":"",
-                "basicAuth":false,
-                "isDefault":false,
-                "jsonData":{"spanBar":{"type":"None"}},
-                "readOnly":false
             }
         ]
     }
