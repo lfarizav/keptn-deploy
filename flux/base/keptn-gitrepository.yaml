@@ -7,5 +7,7 @@ spec:
   interval: 5m0s
   ref:
     branch: main
+  secretRef:
+    name: github-credentials
   timeout: 1m0s
   url: https://github.com/Cuemby/keptn-deploy.git
