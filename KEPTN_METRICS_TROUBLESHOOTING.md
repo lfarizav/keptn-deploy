@@ -80,7 +80,7 @@ The following metrics are now available in Prometheus:
 ## Metric Label Structure
 
 All metrics include these labels:
-- `keptn_deployment_app_name` - Name of the KeptnApp (e.g., "open5gs", "cloudflared")
+- `keptn_deployment_app_name` - Name of the KeptnApp (e.g., "open5gs")
 - `keptn_deployment_app_namespace` - Namespace where app is deployed
 - `keptn_deployment_app_version` - Version hash of the app
 - `keptn_deployment_workload_name` - Name of the workload (e.g., "open5gs-amf")
@@ -130,7 +130,7 @@ kubectl run curl-test --image=curlimages/curl:latest --rm -i --restart=Never -n 
   curl -s "http://prom-kube-prometheus-stack-prometheus:9090/api/v1/query?query=keptn_deployment_deploymentduration"
 ```
 
-Expected result: JSON response with multiple metric series for each Open5GS component and cloudflared.
+Expected result: JSON response with multiple metric series for each Open5GS component.
 
 ## Notes
 

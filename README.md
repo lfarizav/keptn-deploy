@@ -180,7 +180,7 @@ keptn-deploy/
 
 This tenant is managed by the fleet repository. Ensure:
 
-1. **Fleet repo** is bootstrapped: [k8s-open5gs-fleet](https://github.com/lfarizav/k8s-open5gs-fleet)
+1. **Fleet repo** is bootstrapped: [k8s-open5gs-fleet](https://github.com/Cuemby/k8s-open5gs-fleet)
 2. **Namespace** `keptn-system` exists
 3. **RBAC** is configured
 4. **GitRepository** resource points to this repo
@@ -797,7 +797,7 @@ Certificates are managed by cert-manager.
 
 1. **Clone repository**:
    ```bash
-   git clone https://github.com/lfarizav/keptn-deploy.git
+   git clone https://github.com/Cuemby/keptn-deploy.git
    cd keptn-deploy
    ```
 
@@ -844,7 +844,7 @@ Certificates are managed by cert-manager.
 
 ## 📞 Support
 
-- 📧 Issues: [GitHub Issues](https://github.com/lfarizav/keptn-deploy/issues)
+- 📧 Issues: [GitHub Issues](https://github.com/Cuemby/keptn-deploy/issues)
 - 📖 Keptn Docs: [https://keptn.sh/docs/](https://keptn.sh/docs/)
 - 💬 Keptn Slack: [https://slack.keptn.sh/](https://slack.keptn.sh/)
 
