@@ -5,6 +5,6 @@ metadata:
   name: keptnconfig
   namespace: keptn-system
 spec:
-  OTelCollectorUrl: 'jaeger-collector.keptn-system.svc.cluster.local:4317'
+  OTelCollectorUrl: 'jaeger-collector.jaeger.svc.cluster.local:4317'
   keptnAppCreationRequestTimeoutSeconds: 30
   observabilityTimeout: 5m
