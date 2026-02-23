@@ -6,8 +6,8 @@ metadata:
 spec:
   interval: 5m0s
   ref:
-    branch: main
+    branch: 5g-cuemby
   secretRef:
     name: github-credentials
   timeout: 1m0s
-  url: https://github.com/Cuemby/keptn-deploy.git
+  url: https://github.com/lfarizav/keptn-deploy.git
