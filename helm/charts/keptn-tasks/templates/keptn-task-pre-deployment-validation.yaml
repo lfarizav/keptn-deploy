@@ -104,7 +104,36 @@ spec:
         print_result $([ $(echo "$TOTAL_CPU >= $MIN_CPU" | bc) -eq 1 ] && echo 0 || echo 1) "Cluster has minimum $MIN_CPU CPU cores (available: $TOTAL_CPU)"
         print_result $([ $(echo "$TOTAL_MEMORY_GB >= $MIN_MEM_GB" | bc) -eq 1 ] && echo 0 || echo 1) "Cluster has minimum ${MIN_MEM_GB}GB memory (available: ${TOTAL_MEMORY_GB}GB)"
         echo ""
-        
+
+        # srsGNB workload resource adequacy check
+        # Validates that srsgnb resource requests meet production minimums.
+        # On first install the Deployment does not exist yet - check is skipped.
+        # On upgrade/redeploy (e.g. after remediation) the existing Deployment is
+        # inspected so under-resourced configs are caught before pods restart.
+        echo "📡 srsGNB Resource Adequacy Check:"
+        SRSGNB_DEPLOY=$(kubectl get deployment -n $NAMESPACE -l app=srsgnb -o name 2>/dev/null | head -1)
+        if [ -n "$SRSGNB_DEPLOY" ]; then
+          SRSGNB_CPU_REQ=$(kubectl get $SRSGNB_DEPLOY -n $NAMESPACE \
+            -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null || echo "")
+          SRSGNB_MEM_REQ=$(kubectl get $SRSGNB_DEPLOY -n $NAMESPACE \
+            -o jsonpath='{.spec.template.spec.containers[0].resources.requests.memory}' 2>/dev/null || echo "")
+          MIN_SRSGNB_CPU_M=500
+          MIN_SRSGNB_MEM_MI=512
+          if [ -n "$SRSGNB_CPU_REQ" ]; then
+            SRSGNB_CPU_M=$(echo "$SRSGNB_CPU_REQ" | sed 's/m//')
+            print_result $([ "$SRSGNB_CPU_M" -ge "$MIN_SRSGNB_CPU_M" ] && echo 0 || echo 1) \
+              "srsgnb CPU request ${SRSGNB_CPU_M}m >= ${MIN_SRSGNB_CPU_M}m production minimum"
+          fi
+          if [ -n "$SRSGNB_MEM_REQ" ]; then
+            SRSGNB_MEM_MI=$(echo "$SRSGNB_MEM_REQ" | sed 's/Mi//')
+            print_result $([ "$SRSGNB_MEM_MI" -ge "$MIN_SRSGNB_MEM_MI" ] && echo 0 || echo 1) \
+              "srsgnb memory request ${SRSGNB_MEM_MI}Mi >= ${MIN_SRSGNB_MEM_MI}Mi production minimum"
+          fi
+        else
+          print_info "srsgnb deployment not found (first install) - resource check skipped"
+        fi
+        echo ""
+
         # Check if this is initial deployment or upgrade
         EXISTING_PODS=$(kubectl get pods -n $NAMESPACE 2>/dev/null | grep -v "NAME" | wc -l || echo 0)
         
