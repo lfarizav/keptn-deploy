@@ -117,8 +117,16 @@ spec:
             -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null || echo "")
           SRSGNB_MEM_REQ=$(kubectl get $SRSGNB_DEPLOY -n $NAMESPACE \
             -o jsonpath='{.spec.template.spec.containers[0].resources.requests.memory}' 2>/dev/null || echo "")
-          MIN_SRSGNB_CPU_M=500
-          MIN_SRSGNB_MEM_MI=512
+          # Read target resources from ConfigMap — single source of truth from k8s-open5gs values.yaml.
+          # The ConfigMap 'srsgnb-remediation-targets' is rendered by the k8s-open5gs Helm chart
+          # from .Values.keptn.remediation.actions.targetResources, so the threshold below always
+          # matches what the remediation bot will write when it adjusts srsgnb resources.
+          TARGET_CPU_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
+            -o jsonpath='{.data.target-cpu-request}' 2>/dev/null || echo "500m")
+          TARGET_MEM_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
+            -o jsonpath='{.data.target-memory-request}' 2>/dev/null || echo "512Mi")
+          MIN_SRSGNB_CPU_M=$(echo "$TARGET_CPU_REQ" | sed 's/m//')
+          MIN_SRSGNB_MEM_MI=$(echo "$TARGET_MEM_REQ" | sed 's/Mi//')
           if [ -n "$SRSGNB_CPU_REQ" ]; then
             SRSGNB_CPU_M=$(echo "$SRSGNB_CPU_REQ" | sed 's/m//')
             print_result $([ "$SRSGNB_CPU_M" -ge "$MIN_SRSGNB_CPU_M" ] && echo 0 || echo 1) \
