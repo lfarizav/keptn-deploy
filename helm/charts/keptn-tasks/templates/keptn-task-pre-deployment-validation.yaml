@@ -106,39 +106,33 @@ spec:
         echo ""
 
         # srsGNB workload resource adequacy check
-        # Validates that srsgnb resource requests meet production minimums.
-        # On first install the Deployment does not exist yet - check is skipped.
-        # On upgrade/redeploy (e.g. after remediation) the existing Deployment is
-        # inspected so under-resourced configs are caught before pods restart.
+        # Reads the PENDING resources from ConfigMap 'srsgnb-current-resources' — rendered
+        # by the k8s-open5gs Helm chart from .Values.srsgnb.resources on every Flux reconcile.
+        # This means the check always sees what is ABOUT TO BE DEPLOYED (not what the existing
+        # pod already runs), so it catches under-resourced values.yaml on BOTH first install
+        # and upgrades. No skip on first install — the check always runs.
         echo "📡 srsGNB Resource Adequacy Check:"
-        SRSGNB_DEPLOY=$(kubectl get deployment -n $NAMESPACE -l app=srsgnb -o name 2>/dev/null | head -1)
-        if [ -n "$SRSGNB_DEPLOY" ]; then
-          SRSGNB_CPU_REQ=$(kubectl get $SRSGNB_DEPLOY -n $NAMESPACE \
-            -o jsonpath='{.spec.template.spec.containers[0].resources.requests.cpu}' 2>/dev/null || echo "")
-          SRSGNB_MEM_REQ=$(kubectl get $SRSGNB_DEPLOY -n $NAMESPACE \
-            -o jsonpath='{.spec.template.spec.containers[0].resources.requests.memory}' 2>/dev/null || echo "")
-          # Read target resources from ConfigMap — single source of truth from k8s-open5gs values.yaml.
-          # The ConfigMap 'srsgnb-remediation-targets' is rendered by the k8s-open5gs Helm chart
-          # from .Values.keptn.remediation.actions.targetResources, so the threshold below always
-          # matches what the remediation bot will write when it adjusts srsgnb resources.
-          TARGET_CPU_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
-            -o jsonpath='{.data.target-cpu-request}' 2>/dev/null || echo "500m")
-          TARGET_MEM_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
-            -o jsonpath='{.data.target-memory-request}' 2>/dev/null || echo "512Mi")
-          MIN_SRSGNB_CPU_M=$(echo "$TARGET_CPU_REQ" | sed 's/m//')
-          MIN_SRSGNB_MEM_MI=$(echo "$TARGET_MEM_REQ" | sed 's/Mi//')
-          if [ -n "$SRSGNB_CPU_REQ" ]; then
-            SRSGNB_CPU_M=$(echo "$SRSGNB_CPU_REQ" | sed 's/m//')
-            print_result $([ "$SRSGNB_CPU_M" -ge "$MIN_SRSGNB_CPU_M" ] && echo 0 || echo 1) \
-              "srsgnb CPU request ${SRSGNB_CPU_M}m >= ${MIN_SRSGNB_CPU_M}m production minimum"
-          fi
-          if [ -n "$SRSGNB_MEM_REQ" ]; then
-            SRSGNB_MEM_MI=$(echo "$SRSGNB_MEM_REQ" | sed 's/Mi//')
-            print_result $([ "$SRSGNB_MEM_MI" -ge "$MIN_SRSGNB_MEM_MI" ] && echo 0 || echo 1) \
-              "srsgnb memory request ${SRSGNB_MEM_MI}Mi >= ${MIN_SRSGNB_MEM_MI}Mi production minimum"
-          fi
+        SRSGNB_CPU_REQ=$(kubectl get configmap srsgnb-current-resources -n $NAMESPACE \
+          -o jsonpath='{.data.cpu-request}' 2>/dev/null || echo "")
+        SRSGNB_MEM_REQ=$(kubectl get configmap srsgnb-current-resources -n $NAMESPACE \
+          -o jsonpath='{.data.memory-request}' 2>/dev/null || echo "")
+        TARGET_CPU_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
+          -o jsonpath='{.data.target-cpu-request}' 2>/dev/null || echo "1500m")
+        TARGET_MEM_REQ=$(kubectl get configmap srsgnb-remediation-targets -n $NAMESPACE \
+          -o jsonpath='{.data.target-memory-request}' 2>/dev/null || echo "2048Mi")
+        MIN_SRSGNB_CPU_M=$(echo "$TARGET_CPU_REQ" | sed 's/m//')
+        MIN_SRSGNB_MEM_MI=$(echo "$TARGET_MEM_REQ" | sed 's/Mi//')
+        if [ -n "$SRSGNB_CPU_REQ" ]; then
+          SRSGNB_CPU_M=$(echo "$SRSGNB_CPU_REQ" | sed 's/m//')
+          print_result $([ "$SRSGNB_CPU_M" -ge "$MIN_SRSGNB_CPU_M" ] && echo 0 || echo 1) \
+            "srsgnb pending CPU request ${SRSGNB_CPU_M}m >= ${MIN_SRSGNB_CPU_M}m production minimum"
         else
-          print_info "srsgnb deployment not found (first install) - resource check skipped"
+          print_result 1 "srsgnb-current-resources ConfigMap not found — cannot validate pending resources"
+        fi
+        if [ -n "$SRSGNB_MEM_REQ" ]; then
+          SRSGNB_MEM_MI=$(echo "$SRSGNB_MEM_REQ" | sed 's/Mi//')
+          print_result $([ "$SRSGNB_MEM_MI" -ge "$MIN_SRSGNB_MEM_MI" ] && echo 0 || echo 1) \
+            "srsgnb pending memory request ${SRSGNB_MEM_MI}Mi >= ${MIN_SRSGNB_MEM_MI}Mi production minimum"
         fi
         echo ""
 
