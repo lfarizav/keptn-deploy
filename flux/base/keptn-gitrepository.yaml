@@ -6,6 +6,6 @@ metadata:
 spec:
   interval: 5m0s
   ref:
-    branch: kubecon
+    branch: kubeconoptimized
   timeout: 1m0s
   url: https://github.com/lfarizav/keptn-deploy.git
